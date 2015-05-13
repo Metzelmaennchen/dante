@@ -397,12 +397,12 @@ static bool R_LinkGLSLShader(shaderProgram_t *shaderProgram, bool needsAttribute
 	glAttachShader(shaderProgram->program, shaderProgram->fragmentShader);
 
 	if (needsAttributes) {
-		glBindAttribLocation(shaderProgram->program, 8, "attr_TexCoord");
-		glBindAttribLocation(shaderProgram->program, 9, "attr_Tangent");
-		glBindAttribLocation(shaderProgram->program, 10, "attr_Bitangent");
-		glBindAttribLocation(shaderProgram->program, 11, "attr_Normal");
-		glBindAttribLocation(shaderProgram->program, 12, "attr_Vertex");
-		glBindAttribLocation(shaderProgram->program, 13, "attr_Color");
+		glBindAttribLocation(shaderProgram->program, 0, "attr_Vertex");
+		glBindAttribLocation(shaderProgram->program, 1, "attr_TexCoord");
+		glBindAttribLocation(shaderProgram->program, 2, "attr_Color");
+		glBindAttribLocation(shaderProgram->program, 3, "attr_Normal");
+		glBindAttribLocation(shaderProgram->program, 4, "attr_Tangent");
+		glBindAttribLocation(shaderProgram->program, 5, "attr_Bitangent");
 	}
 
 	glLinkProgram(shaderProgram->program);
