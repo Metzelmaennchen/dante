@@ -82,7 +82,7 @@ void idVertexCache::ActuallyFree(vertCache_t *block)
 		if (block->vbo) {
 #if 0		// this isn't really necessary, it will be reused soon enough
 			// filling with zero length data is the equivalent of freeing
-			glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+			BindBuffer(GL_ARRAY_BUFFER, block->vbo);
 			glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
 #endif
 		} else if (block->virtMem) {
@@ -139,9 +139,9 @@ void *idVertexCache::Position(vertCache_t *buffer)
 		}
 
 		if (buffer->indexBuffer) {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->vbo);
+			BindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->vbo);
 		} else {
-			glBindBuffer(GL_ARRAY_BUFFER, buffer->vbo);
+			BindBuffer(GL_ARRAY_BUFFER, buffer->vbo);
 		}
 
 		return (void *)buffer->offset;
@@ -151,9 +151,27 @@ void *idVertexCache::Position(vertCache_t *buffer)
 	return (void *)((byte *)buffer->virtMem + buffer->offset);
 }
 
+void idVertexCache::BindBuffer(GLenum target, GLuint buffer)
+{
+    static GLuint activeVertexBuffer = 0;
+    static GLuint activeIndexBuffer = 0;
+
+    if (target == GL_ARRAY_BUFFER) {
+        if (activeVertexBuffer != buffer) {
+            activeVertexBuffer = buffer;
+            glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        }
+    } else {
+        if (activeIndexBuffer != buffer) {
+            activeIndexBuffer = buffer;
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
+        }
+    }
+}
+
 void idVertexCache::UnbindIndex()
 {
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 
@@ -290,10 +308,10 @@ void idVertexCache::Alloc(void *data, int size, vertCache_t **buffer, bool index
 	// copy the data
 	if (block->vbo) {
 		if (indexBuffer) {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
+			BindBuffer(GL_ELEMENT_ARRAY_BUFFER, block->vbo);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizei)size, data, GL_STATIC_DRAW);
 		} else {
-			glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+			BindBuffer(GL_ARRAY_BUFFER, block->vbo);
 
 			if (allocatingTempBuffer) {
 				glBufferData(GL_ARRAY_BUFFER, (GLsizei)size, data, GL_STREAM_DRAW);
@@ -433,7 +451,7 @@ vertCache_t	*idVertexCache::AllocFrameTemp(void *data, int size)
 	block->vbo = tempBuffers[listNum]->vbo;
 
 	if (block->vbo) {
-		glBindBuffer(GL_ARRAY_BUFFER, block->vbo);
+		BindBuffer(GL_ARRAY_BUFFER, block->vbo);
 		glBufferSubData(GL_ARRAY_BUFFER, block->offset, (GLsizei)size, data);
 	} else {
 		SIMDProcessor->Memcpy((byte *)block->virtMem + block->offset, data, size);
@@ -481,8 +499,8 @@ void idVertexCache::EndFrame()
 #endif
 
 	// unbind vertex buffers
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	BindBuffer(GL_ARRAY_BUFFER, 0);
+	BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	currentFrame = tr.frameCount;
 	listNum = currentFrame % NUM_VERTEX_FRAMES;
