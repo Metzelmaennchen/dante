@@ -330,7 +330,6 @@ void RB_T_FillDepthBuffer(const drawSurf_t *surf)
 	const float	*regs;
 	float		color[4];
 	const srfTriangles_t	*tri;
-	const float	one[1] = { 1 };
 
 	tri = surf->geo;
 	shader = surf->material;
@@ -450,7 +449,7 @@ void RB_T_FillDepthBuffer(const drawSurf_t *surf)
 			}
 
 			GL_Uniform4fv(offsetof(shaderProgram_t, glColor), color);
-			GL_Uniform1fv(offsetof(shaderProgram_t, alphaTest), &regs[pStage->alphaTestRegister]);
+			GL_Uniform1f(offsetof(shaderProgram_t, alphaTest), regs[pStage->alphaTestRegister]);
 
 			// bind the texture
 			pStage->texture.image->Bind();
@@ -472,7 +471,7 @@ void RB_T_FillDepthBuffer(const drawSurf_t *surf)
 	// draw the entire surface solid
 	if (drawSolid) {
 		GL_Uniform4fv(offsetof(shaderProgram_t, glColor), color);
-		GL_Uniform1fv(offsetof(shaderProgram_t, alphaTest), one);
+		GL_Uniform1f(offsetof(shaderProgram_t, alphaTest), 1.0f);
 
 		globalImages->whiteImage->Bind();
 

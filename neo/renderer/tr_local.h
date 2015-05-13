@@ -994,7 +994,7 @@ GL wrapper/helper functions
 
 void	GL_SelectTexture(int unit);
 void	GL_UseProgram(shaderProgram_s *program);
-void	GL_Uniform1fv(GLint location, const GLfloat *value);
+#define GL_Uniform1f(A, B) glUniform1f(*(GLint *)((char *)backEnd.glState.currentProgram + A), B)
 void	GL_Uniform4fv(GLint location, const GLfloat *value);
 void	GL_UniformMatrix4fv(GLint location, const GLfloat *value);
 void	GL_EnableVertexAttribArray(GLuint index);

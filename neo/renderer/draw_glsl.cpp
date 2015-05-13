@@ -120,7 +120,7 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 			f = 4.0f;
 			break;
 	}
-	GL_Uniform1fv(offsetof(shaderProgram_t, specularExponent), &f);
+	GL_Uniform1f(offsetof(shaderProgram_t, specularExponent), f);
 
 	// set the textures
 

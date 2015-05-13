@@ -175,24 +175,6 @@ void GL_UseProgram(shaderProgram_t *program)
 
 /*
 ====================
-GL_Uniform1fv
-====================
-*/
-void GL_Uniform1fv(GLint location, const GLfloat *value)
-{
-	if (!backEnd.glState.currentProgram) {
-		common->Printf("GL_Uniform1fv: no current program object\n");
-		__builtin_trap();
-		return;
-	}
-
-	glUniform1fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
-
-	GL_CheckErrors();
-}
-
-/*
-====================
 GL_Uniform4fv
 ====================
 */
