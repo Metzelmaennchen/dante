@@ -409,9 +409,7 @@ void RB_T_FillDepthBuffer(const drawSurf_t *surf)
 	}
 
 	idDrawVert *ac = (idDrawVert *)vertexCache.Position(tri->ambientCache);
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), reinterpret_cast<void *>(&ac->st));
 
 	bool drawSolid = false;
@@ -492,9 +490,6 @@ void RB_T_FillDepthBuffer(const drawSurf_t *surf)
 	if (shader->GetSort() == SS_SUBVIEW) {
 		GL_State(GLS_DEPTHFUNC_LESS);
 	}
-
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 }
 
 /*
@@ -530,6 +525,7 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	// the first texture will be used for alpha tested surfaces
 	GL_SelectTexture(0);
+	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 
 	// decal surfaces may enable polygon offset
@@ -555,6 +551,7 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 #endif
 
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
 	GL_UseProgram(NULL);
 }
@@ -738,8 +735,6 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 	}
 
 	idDrawVert *ac = (idDrawVert *)vertexCache.Position(tri->ambientCache);
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
 	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), reinterpret_cast<void *>(&ac->st));
 
@@ -916,9 +911,6 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 		}
 	}
 
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-
 	// reset polygon offset
 	if (shader->TestMaterialFlag(MF_POLYGONOFFSET)) {
 		glDisable(GL_POLYGON_OFFSET_FILL);
@@ -970,6 +962,7 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 	globalImages->BindNull();
 
 	GL_SelectTexture(0);
+	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 
 	RB_SetProgramEnvironment();
@@ -1005,6 +998,7 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 #endif
 
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
 	GL_UseProgram(NULL);
 
