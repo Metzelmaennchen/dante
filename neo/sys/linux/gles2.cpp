@@ -29,6 +29,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "../../renderer/tr_local.h"
 #include "local.h"
 
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
