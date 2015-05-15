@@ -1046,7 +1046,6 @@ static void RB_T_Shadow(const drawSurf_t *surf)
 		return;
 	}
 
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 4, GL_FLOAT, false, sizeof(shadowCache_t),
 			vertexCache.Position(tri->shadowCache));
 
@@ -1158,8 +1157,6 @@ static void RB_T_Shadow(const drawSurf_t *surf)
 	}
 	GL_Cull(CT_TWO_SIDED);
 	RB_DrawShadowElementsWithCounters(tri, numIndexes);
-
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 }
 
 /*
@@ -1211,7 +1208,9 @@ void RB_StencilShadowPass(const drawSurf_t *drawSurfs)
 	}
 #endif
 
+	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 	RB_RenderDrawSurfChainWithFunction(drawSurfs, RB_T_Shadow);
+	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
 	GL_Cull(CT_FRONT_SIDED);
 
