@@ -177,7 +177,6 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));	// gl_Vertex
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 
 	// vertex color standard is SVC_IGNORE
@@ -217,7 +216,6 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));	// gl_Vertex
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 
 	// disable features
@@ -257,6 +255,8 @@ void RB_GLSL_DrawInteractions(void)
 	/*
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 	*/
+
+        glEnableVertexAttribArray(0);
 
 	//
 	// for each light, perform adding and shadowing
@@ -319,6 +319,8 @@ void RB_GLSL_DrawInteractions(void)
 
 		backEnd.depthFunc = GLS_DEPTHFUNC_EQUAL;
 	}
+
+        glDisableVertexAttribArray(0);
 
 	// disable stencil shadow test
 	glStencilFunc(GL_ALWAYS, 128, 255);

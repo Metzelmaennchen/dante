@@ -661,6 +661,10 @@ void RB_SetProgramEnvironmentSpace(void)
 	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
 }
 
+
+stageVertexColor_t RB_STD_T_ActiveVertexColor;
+
+
 /*
 ==================
 RB_STD_T_RenderShaderPasses
@@ -875,19 +879,22 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 		static const float one[4] = { 1, 1, 1, 1 };
 		static const float negOne[4] = { -1, -1, -1, -1 };
 
-		switch (pStage->vertexColor) {
-			case SVC_IGNORE:
-				GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), zero);
-				GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
-				break;
-			case SVC_MODULATE:
-				GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), one);
-				GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), zero);
-				break;
-			case SVC_INVERSE_MODULATE:
-				GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), negOne);
-				GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
-				break;
+		if (RB_STD_T_ActiveVertexColor != pStage->vertexColor) {
+			switch (pStage->vertexColor) {
+				case SVC_IGNORE:
+					GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), zero);
+					GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
+					break;
+				case SVC_MODULATE:
+					GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), one);
+					GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), zero);
+					break;
+				case SVC_INVERSE_MODULATE:
+					GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), negOne);
+					GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
+					break;
+			}
+			RB_STD_T_ActiveVertexColor = pStage->vertexColor;
 		}
 
 		GL_Uniform4fv(offsetof(shaderProgram_t, glColor), color);
@@ -963,6 +970,10 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 	GL_SelectTexture(0);
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	// vertex color standard is SVC_IGNORE
+	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorModulate)), 0.0, 0.0, 0.0, 0.0);
+	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorAdd)), 1.0, 1.0, 1.0, 1.0);
+	RB_STD_T_ActiveVertexColor = SVC_IGNORE;
 
 	RB_SetProgramEnvironment();
 
@@ -1208,9 +1219,7 @@ void RB_StencilShadowPass(const drawSurf_t *drawSurfs)
 	}
 #endif
 
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 	RB_RenderDrawSurfChainWithFunction(drawSurfs, RB_T_Shadow);
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
 	GL_Cull(CT_FRONT_SIDED);
 
