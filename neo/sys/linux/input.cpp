@@ -29,6 +29,8 @@ If you have questions concerning this license or the applicable additional terms
 #include "../posix/posix_public.h"
 #include "local.h"
 
+#include <X11/Xutil.h>
+
 #include <pthread.h>
 
 idCVar in_mouse("in_mouse", "1", CVAR_SYSTEM | CVAR_ARCHIVE, "");
