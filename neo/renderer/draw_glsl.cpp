@@ -56,6 +56,8 @@ static void GL_SelectTextureNoClient(int unit)
 	RB_LogComment("glActiveTexture( %i )\n", unit);
 }
 
+stageVertexColor_t _activeVertexColor;
+
 /*
 ==================
 RB_GLSL_DrawInteraction
@@ -82,19 +84,22 @@ void	RB_GLSL_DrawInteraction(const drawInteraction_t *din)
 	GL_Uniform4fv(offsetof(shaderProgram_t, specularMatrixS), din->specularMatrix[0].ToFloatPtr());
 	GL_Uniform4fv(offsetof(shaderProgram_t, specularMatrixT), din->specularMatrix[1].ToFloatPtr());
 
-	switch (din->vertexColor) {
-		case SVC_IGNORE:
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), zero);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
-			break;
-		case SVC_MODULATE:
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), one);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), zero);
-			break;
-		case SVC_INVERSE_MODULATE:
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), negOne);
-			GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
-			break;
+	if (_activeVertexColor != din->vertexColor) {
+		switch (din->vertexColor) {
+			case SVC_IGNORE:
+				GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), zero);
+				GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
+				break;
+			case SVC_MODULATE:
+				GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), one);
+				GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), zero);
+				break;
+			case SVC_INVERSE_MODULATE:
+				GL_Uniform4fv(offsetof(shaderProgram_t, colorModulate), negOne);
+				GL_Uniform4fv(offsetof(shaderProgram_t, colorAdd), one);
+				break;
+		}
+		_activeVertexColor = din->vertexColor;
 	}
 
 	// set the constant colors
@@ -174,6 +179,11 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));	// gl_Vertex
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
+
+	// vertex color standard is SVC_IGNORE
+	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorModulate)), 0.0, 0.0, 0.0, 0.0);
+	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorAdd)), 1.0, 1.0, 1.0, 1.0);
+	_activeVertexColor = SVC_IGNORE;
 
 	// texture 5 is the specular lookup table
 	GL_SelectTextureNoClient(5);
