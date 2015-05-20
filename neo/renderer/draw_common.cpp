@@ -524,7 +524,6 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	// the first texture will be used for alpha tested surfaces
 	GL_SelectTexture(0);
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 
 	// decal surfaces may enable polygon offset
@@ -550,7 +549,6 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 #endif
 
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
 	GL_UseProgram(NULL);
 }
@@ -968,7 +966,6 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 	globalImages->BindNull();
 
 	GL_SelectTexture(0);
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 	// vertex color standard is SVC_IGNORE
 	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorModulate)), 0.0, 0.0, 0.0, 0.0);
@@ -1008,7 +1005,6 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 #endif
 
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Vertex));
 
 	GL_UseProgram(NULL);
 

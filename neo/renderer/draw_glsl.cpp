@@ -320,8 +320,6 @@ void RB_GLSL_DrawInteractions(void)
 		backEnd.depthFunc = GLS_DEPTHFUNC_EQUAL;
 	}
 
-        glDisableVertexAttribArray(0);
-
 	// disable stencil shadow test
 	glStencilFunc(GL_ALWAYS, 128, 255);
 
@@ -566,6 +564,10 @@ static bool RB_GLSL_InitShaders(void)
 	} else {
 		RB_GLSL_GetUniformLocations(&depthFillShader);
 	}
+
+	// enable vertex attribute at location 0 once and for all.
+	// This is the vertices attribue and used acoss all shaders
+	glEnableVertexAttribArray(0);
 
 	return true;
 }
