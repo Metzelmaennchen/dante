@@ -179,6 +179,12 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 
+	// set the modelview matrix for the viewer
+	float   mat[16];
+	myGlMultMatrix(surf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
+	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+	backEnd.currentSpace = surf->space;
+
 	// vertex color standard is SVC_IGNORE
 	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorModulate)), 0.0, 0.0, 0.0, 0.0);
 	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorAdd)), 1.0, 1.0, 1.0, 1.0);
@@ -190,11 +196,6 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 
 	for (; surf ; surf=surf->nextOnLight) {
 		// perform setup here that will not change over multiple interaction passes
-
-		// set the modelview matrix for the viewer
-		float   mat[16];
-		myGlMultMatrix(surf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
-		GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
 
 		// set the vertex pointers
 		idDrawVert	*ac = (idDrawVert *)vertexCache.Position(surf->geo->ambientCache);
