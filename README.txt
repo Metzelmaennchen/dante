@@ -1,3 +1,7 @@
+In memory of Oliver McFadden... I'm so sad...
+But I know you are a Doom fan, so please be the next marine who kicks hell :(
+A lot of tears are iń my face while writing these lines.
+
 Dante Engine (http://github.com/omcfadde/dante, http://dante.mobi)
 =========================
 
