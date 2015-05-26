@@ -1028,6 +1028,9 @@ RB_T_Shadow
 the shadow volumes face INSIDE
 =====================
 */
+
+static bool _external;
+
 static void RB_T_Shadow(const drawSurf_t *surf)
 {
 	const srfTriangles_t	*tri;
@@ -1154,13 +1157,15 @@ static void RB_T_Shadow(const drawSurf_t *surf)
 	}
 
 	// depth-fail stencil shadows
-	if (!external) {
+	if (!external && _external) {
 		glStencilOpSeparate(backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, tr.stencilDecr, GL_KEEP);
 		glStencilOpSeparate(backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, tr.stencilIncr, GL_KEEP);
-	} else {
+		_external = false;
+	} else if (external && !_external) {
 		// traditional depth-pass stencil shadows
 		glStencilOpSeparate(backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, GL_KEEP, tr.stencilIncr);
 		glStencilOpSeparate(backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, GL_KEEP, tr.stencilDecr);
+		_external = true;
 	}
 	GL_Cull(CT_TWO_SIDED);
 	RB_DrawShadowElementsWithCounters(tri, numIndexes);
@@ -1214,6 +1219,11 @@ void RB_StencilShadowPass(const drawSurf_t *drawSurfs)
 		glEnable(GL_DEPTH_BOUNDS_TEST_EXT);
 	}
 #endif
+
+	_external = true;
+	// traditional depth-pass stencil shadows
+	glStencilOpSeparate(backEnd.viewDef->isMirror ? GL_FRONT : GL_BACK, GL_KEEP, GL_KEEP, tr.stencilIncr);
+	glStencilOpSeparate(backEnd.viewDef->isMirror ? GL_BACK : GL_FRONT, GL_KEEP, GL_KEEP, tr.stencilDecr);
 
 	RB_RenderDrawSurfChainWithFunction(drawSurfs, RB_T_Shadow);
 
