@@ -1048,6 +1048,8 @@ static void RB_T_Shadow(const drawSurf_t *surf)
 
 		myGlMultMatrix(surf->space->modelViewMatrix, backEnd.viewDef->projectionMatrix, mat);
 		GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelViewProjectionMatrix), mat);
+
+		backEnd.currentSpace = surf->space;
 	}
 
 	tri = surf->geo;
