@@ -508,8 +508,6 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	RB_LogComment("---------- RB_STD_FillDepthBuffer ----------\n");
 
-	GL_UseProgram(&depthFillShader);
-
 #warning unimplemented in GLES shaders
 #if !defined(GL_ES_VERSION_2_0)
 	// enable the second texture for mirror plane clipping if needed
@@ -521,10 +519,6 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 		glTexCoord2f(1, 0.5);
 	}
 #endif
-
-	// the first texture will be used for alpha tested surfaces
-	GL_SelectTexture(0);
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 
 	// decal surfaces may enable polygon offset
 	glPolygonOffset(r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat());
@@ -547,10 +541,6 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 		GL_SelectTexture(0);
 	}
 #endif
-
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-
-	GL_UseProgram(NULL);
 }
 
 /*
@@ -1731,9 +1721,17 @@ void	RB_STD_DrawView(void)
 	// decide how much overbrighting we are going to do
 	RB_DetermineLightScale();
 
+	GL_UseProgram(&depthFillShader);
+
+	// the first texture will be used for alpha tested surfaces
+	GL_SelectTexture(0);
+	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+
 	// fill the depth buffer and clear color buffer to black except on
 	// subviews
 	RB_STD_FillDepthBuffer(drawSurfs, numDrawSurfs);
+
+	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 
 	// main light renderer
 	switch (tr.backEndRenderer) {
