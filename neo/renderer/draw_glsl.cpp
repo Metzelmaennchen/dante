@@ -206,7 +206,7 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
 
 		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), ac->color);
+		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, true, sizeof(idDrawVert), ac->color);
 
 		// this may cause RB_GLSL_DrawInteraction to be exacuted multiple
 		// times with different colors and images if the surface or light have multiple layers
