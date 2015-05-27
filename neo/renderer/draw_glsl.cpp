@@ -237,8 +237,6 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 
 	backEnd.glState.currenttmu = -1;
 	GL_SelectTexture(0);
-
-	GL_UseProgram(NULL);
 }
 
 
@@ -304,7 +302,6 @@ void RB_GLSL_DrawInteractions(void)
 		GL_UseProgram(&shadowShader);
 		RB_StencilShadowPass(vLight->localShadows);
 		RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
-		GL_UseProgram(NULL);	// if there weren't any globalInteractions, it would have stayed on
 
 		// translucent surfaces never get stencil shadowed
 		if (r_skipTranslucent.GetBool()) {
@@ -513,8 +510,6 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 	}
 
 	GL_CheckErrors();
-
-	GL_UseProgram(NULL);
 }
 
 static bool RB_GLSL_InitShaders(void)

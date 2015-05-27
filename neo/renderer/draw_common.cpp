@@ -993,8 +993,6 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 
-	GL_UseProgram(NULL);
-
 	return i;
 }
 
