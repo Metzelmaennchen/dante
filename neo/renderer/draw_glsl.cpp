@@ -237,8 +237,6 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 
 	backEnd.glState.currenttmu = -1;
 	GL_SelectTexture(0);
-
-	GL_UseProgram(NULL);
 }
 
 
@@ -512,8 +510,6 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 	}
 
 	GL_CheckErrors();
-
-	GL_UseProgram(NULL);
 }
 
 static bool RB_GLSL_InitShaders(void)
