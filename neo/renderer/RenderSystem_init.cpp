@@ -72,8 +72,6 @@ idCVar r_swapInterval("r_swapInterval", "0", CVAR_RENDERER | CVAR_ARCHIVE | CVAR
 idCVar r_gamma("r_gamma", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "changes gamma tables", 0.5f, 3.0f);
 idCVar r_brightness("r_brightness", "1", CVAR_RENDERER | CVAR_ARCHIVE | CVAR_FLOAT, "changes gamma tables", 0.5f, 2.0f);
 
-idCVar r_renderer("r_renderer", "glsl", CVAR_RENDERER | CVAR_ARCHIVE, "hardware specific renderer path to use");
-
 idCVar r_jitter("r_jitter", "0", CVAR_RENDERER | CVAR_BOOL, "randomly subpixel jitter the projection matrix");
 
 idCVar r_skipSuppress("r_skipSuppress", "0", CVAR_RENDERER | CVAR_BOOL, "ignore the per-view suppressions");
@@ -533,10 +531,6 @@ void R_InitOpenGL(void)
 	// allocate the vertex array range or vertex objects
 	vertexCache.Init();
 
-	// select which renderSystem we are going to use
-	r_renderer.SetModified();
-	tr.SetBackEndRenderer();
-
 	// allocate the frame data, which may be more if smp is enabled
 	R_InitFrameData();
 
@@ -557,6 +551,94 @@ void GL_CheckErrors(void)
 
 	// check for up to 10 errors pending
 	for (i = 0 ; i < 10 ; i++) {
+#if !defined(GL_ES_VERSION_2_0)
+            
+                err = eglGetError();
+
+                if (err == EGL_SUCCESS) {
+                        return;
+                }
+                
+                switch (err)
+                {
+                    case EGL_NOT_INITIALIZED:
+                        std::cerr << "egl error -> EGL_NOT_INITIALIZED : "
+                                << "EGL is not initialized, or could not be initialized, "
+                                << "for the specified EGL display connection." << std::endl;
+                        break;
+                        
+                    case EGL_BAD_ACCESS:
+                        std::cerr << "egl error -> EGL_BAD_ACCESS : "
+                                << "EGL cannot access a requested resource (for example "
+                                << "a context is bound in another thread)." << std::endl;
+                        break;
+                        
+                    case EGL_BAD_ALLOC:
+                        std::cerr << "egl error -> EGL_BAD_ALLOC : "
+                                << "EGL failed to allocate resources for the requested operation." << std::endl;
+                        break;
+                        
+                    case EGL_BAD_ATTRIBUTE:
+                        std::cerr << "egl error -> EGL_BAD_ATTRIBUTE : "
+                                << "An unrecognized attribute or attribute value was passed in the attribute list." << std::endl;
+                        break;
+                        
+                    case EGL_BAD_CONTEXT:
+                        std::cerr << "egl error -> EGL_BAD_CONTEXT : "
+                                << "An EGLContext argument does not name a valid EGL rendering context." << std::endl;
+                        break;
+                        
+                    case EGL_BAD_CONFIG:
+                        std::cerr << "egl error -> EGL_BAD_CONFIG : "
+                                << "An EGLConfig argument does not name a valid EGL frame buffer configuration." << std::endl;
+                        break;
+                        
+                    case EGL_BAD_CURRENT_SURFACE:
+                        std::cerr << "egl error -> EGL_BAD_CURRENT_SURFACE : "
+                                << "The current surface of the calling thread is a window, pixel buffer or pixmap that is no longer valid." << std::endl;
+                        break;
+                        
+                    case EGL_BAD_DISPLAY:
+                        std::cerr << "egl error -> EGL_BAD_DISPLAY : "
+                                << "An EGLDisplay argument does not name a valid EGL display connection." << std::endl;
+                        break;
+                        
+                    case EGL_BAD_SURFACE:
+                        std::cerr << "egl error -> EGL_BAD_SURFACE : "
+                                << "An EGLSurface argument does not name a valid surface (window, pixel buffer or pixmap) configured for GL rendering." << std::endl;
+                        break;
+                        
+                    case EGL_BAD_MATCH:
+                        std::cerr << "egl error -> EGL_BAD_MATCH : "
+                                << "Arguments are inconsistent (for example, a valid context requires buffers not supplied by a valid surface)." << std::endl;
+                        break;
+                        
+                    case EGL_BAD_PARAMETER:
+                        std::cerr << "egl error -> EGL_BAD_PARAMETER : "
+                                << "One or more argument values are invalid." << std::endl;
+                        break;
+                        
+                    case EGL_BAD_NATIVE_PIXMAP:
+                        std::cerr << "egl error -> EGL_BAD_NATIVE_PIXMAP : "
+                                << "A NativePixmapType argument does not refer to a valid native pixmap." << std::endl;
+                        break;
+                        
+                    case EGL_BAD_NATIVE_WINDOW:
+                        std::cerr << "egl error -> EGL_BAD_NATIVE_WINDOW : "
+                                << "A NativeWindowType argument does not refer to a valid native window." << std::endl;
+                        break;
+                        
+                    case EGL_CONTEXT_LOST:
+                        std::cerr << "egl error -> EGL_CONTEXT_LOST : "
+                                << "A power management event has occurred. The application must destroy all "
+                                << "contexts and reinitialise OpenGL ES state and objects to continue rendering." << std::endl;
+                        break;
+
+                    default:
+                        idStr::snPrintf(s, sizeof(s), "%i", err);
+                                break;
+                }
+#else
 		err = glGetError();
 
 		if (err == GL_NO_ERROR) {
@@ -588,6 +670,7 @@ void GL_CheckErrors(void)
 				idStr::snPrintf(s, sizeof(s), "%i", err);
 				break;
 		}
+#endif
 
 		if (!r_ignoreGLErrors.GetBool()) {
 			common->Printf("GL_CheckErrors: %s\n", s);
@@ -1959,7 +2042,6 @@ void idRenderSystemLocal::Clear(void)
 	viewportOffset[1] = 0;
 	tiledViewport[0] = 0;
 	tiledViewport[1] = 0;
-	backEndRenderer = BE_BAD;
 	backEndRendererMaxLight = 1.0f;
 	ambientLightVector.Zero();
 	sortOffset = 0;

@@ -641,7 +641,7 @@ void RB_SetProgramEnvironmentSpace(void)
 
 	// we need the model matrix without it being combined with the view matrix
 	// so we can transform local vectors to global coordinates
-	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), space->modelMatrix);
+//	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), space->modelMatrix);
 
 	// set the modelview matrix for the viewer
 	float	mat[16];
@@ -651,6 +651,7 @@ void RB_SetProgramEnvironmentSpace(void)
 
 
 stageVertexColor_t RB_STD_T_ActiveVertexColor;
+stageVertexColor_t _shaderPassVertexColor;
 
 
 /*
@@ -766,7 +767,6 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Bitangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
 			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Normal), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
 
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
 			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
 			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
@@ -857,15 +857,11 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 			continue;
 		}
 
-		// select the vertex color source
-		if (pStage->vertexColor != SVC_IGNORE) {
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, true, sizeof(idDrawVert), (void *)&ac->color);
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
-		}
-
 		static const float zero[4] = { 0, 0, 0, 0 };
 		static const float one[4] = { 1, 1, 1, 1 };
 		static const float negOne[4] = { -1, -1, -1, -1 };
+
+		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, true, sizeof(idDrawVert), (void *)&ac->color);
 
 		if (RB_STD_T_ActiveVertexColor != pStage->vertexColor) {
 			switch (pStage->vertexColor) {
@@ -899,10 +895,6 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 		RB_DrawElementsWithCounters(tri);
 
 		RB_FinishStageTexturing(pStage, surf, ac);
-
-		if (pStage->vertexColor != SVC_IGNORE) {
-			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
-		}
 	}
 
 	// reset polygon offset
@@ -957,6 +949,7 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	GL_SelectTexture(0);
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 	// vertex color standard is SVC_IGNORE
 	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorModulate)), 0.0, 0.0, 0.0, 0.0);
 	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorAdd)), 1.0, 1.0, 1.0, 1.0);
@@ -968,6 +961,9 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 	// because we want to defer the matrix load because many
 	// surfaces won't draw any ambient passes
 	backEnd.currentSpace = NULL;
+
+	// force update of vertex color if needed
+	_shaderPassVertexColor = SVC_INVERSE_MODULATE;
 
 	for (i = 0  ; i < numDrawSurfs ; i++) {
 		if (drawSurfs[i]->material->SuppressInSubview()) {
@@ -995,6 +991,7 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 #endif
 
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 
 	GL_UseProgram(NULL);
 
@@ -1734,16 +1731,7 @@ void	RB_STD_DrawView(void)
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 
 	// main light renderer
-	switch (tr.backEndRenderer) {
-#if !defined(GL_ES_VERSION_2_0)
-		case BE_ARB2:
-			RB_ARB2_DrawInteractions();
-			break;
-#endif
-		case BE_GLSL:
-			RB_GLSL_DrawInteractions();
-			break;
-	}
+	RB_GLSL_DrawInteractions();
 
 	// disable stencil shadow test
 	glStencilFunc(GL_ALWAYS, 128, 255);
