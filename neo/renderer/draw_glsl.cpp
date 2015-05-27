@@ -257,8 +257,6 @@ void RB_GLSL_DrawInteractions(void)
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
 	*/
 
-        glEnableVertexAttribArray(0);
-
 	//
 	// for each light, perform adding and shadowing
 	//
