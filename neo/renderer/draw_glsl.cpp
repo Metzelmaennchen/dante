@@ -306,7 +306,6 @@ void RB_GLSL_DrawInteractions(void)
 		GL_UseProgram(&shadowShader);
 		RB_StencilShadowPass(vLight->localShadows);
 		RB_GLSL_CreateDrawInteractions(vLight->globalInteractions);
-		GL_UseProgram(NULL);	// if there weren't any globalInteractions, it would have stayed on
 
 		// translucent surfaces never get stencil shadowed
 		if (r_skipTranslucent.GetBool()) {
