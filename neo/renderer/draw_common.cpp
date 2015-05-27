@@ -771,7 +771,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 				continue;
 			}
 
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), (void *)&ac->color);
+			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, true, sizeof(idDrawVert), (void *)&ac->color);
 			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Tangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
 			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Bitangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
 			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Normal), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
@@ -869,7 +869,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 
 		// select the vertex color source
 		if (pStage->vertexColor != SVC_IGNORE) {
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), (void *)&ac->color);
+			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, true, sizeof(idDrawVert), (void *)&ac->color);
 			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 		}
 
