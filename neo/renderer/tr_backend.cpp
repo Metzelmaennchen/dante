@@ -170,8 +170,6 @@ void GL_UseProgram(shaderProgram_t *program)
 
 	glUseProgram(program->program);
 	backEnd.glState.currentProgram = program;
-
-	GL_CheckErrors();
 }
 
 /*
@@ -188,8 +186,6 @@ void GL_Uniform4fv(GLint location, const GLfloat *value)
 	}
 
 	glUniform4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
-
-	GL_CheckErrors();
 }
 
 /*
@@ -206,8 +202,6 @@ void GL_UniformMatrix4fv(GLint location, const GLfloat *value)
 	}
 
 	glUniformMatrix4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, GL_FALSE, value);
-
-	GL_CheckErrors();
 }
 
 /*
@@ -230,8 +224,6 @@ void GL_EnableVertexAttribArray(GLuint index)
 	}
 
 	glEnableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
-
-	GL_CheckErrors();
 }
 
 /*
@@ -254,8 +246,6 @@ void GL_DisableVertexAttribArray(GLuint index)
 	}
 
 	glDisableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
-
-	GL_CheckErrors();
 }
 
 /*
@@ -281,8 +271,6 @@ void GL_VertexAttribPointer(GLuint index, GLint size, GLenum type,
 
 	glVertexAttribPointer(*(GLint *)((char *)backEnd.glState.currentProgram + index),
 	                      size, type, normalized, stride, pointer);
-
-	GL_CheckErrors();
 }
 
 /*
