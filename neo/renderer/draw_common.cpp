@@ -30,6 +30,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "tr_local.h"
 
+static float _alphaTest;
+
 /*
 =====================
 RB_BakeTextureMatrixIntoTexgen
@@ -449,7 +451,10 @@ void RB_T_FillDepthBuffer(const drawSurf_t *surf)
 			}
 
 			GL_Uniform4fv(offsetof(shaderProgram_t, glColor), color);
-			GL_Uniform1f(offsetof(shaderProgram_t, alphaTest), regs[pStage->alphaTestRegister]);
+			if (_alphaTest != regs[pStage->alphaTestRegister]) {
+				_alphaTest = regs[pStage->alphaTestRegister];
+				GL_Uniform1f(offsetof(shaderProgram_t, alphaTest), regs[pStage->alphaTestRegister]);
+			 }
 
 			// bind the texture
 			pStage->texture.image->Bind();
@@ -471,7 +476,10 @@ void RB_T_FillDepthBuffer(const drawSurf_t *surf)
 	// draw the entire surface solid
 	if (drawSolid) {
 		GL_Uniform4fv(offsetof(shaderProgram_t, glColor), color);
-		GL_Uniform1f(offsetof(shaderProgram_t, alphaTest), 1.0f);
+		if (_alphaTest != 1.0f) {
+			_alphaTest = 1.0f;
+			GL_Uniform1f(offsetof(shaderProgram_t, alphaTest), 1.0f);
+		}
 
 		globalImages->whiteImage->Bind();
 
@@ -530,6 +538,9 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 	// from the ambient pass and the light passes.
 	glEnable(GL_STENCIL_TEST);
 	glStencilFunc(GL_ALWAYS, 1, 255);
+    
+    _alphaTest = 1.0f;
+    GL_Uniform1f(offsetof(shaderProgram_t, alphaTest), 1.0f);
 
 	RB_RenderDrawSurfListWithFunction(drawSurfs, numDrawSurfs, RB_T_FillDepthBuffer);
 
