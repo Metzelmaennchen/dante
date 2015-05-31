@@ -267,6 +267,23 @@ class idMath
 ID_INLINE float idMath::RSqrt(float x)
 {
 
+#ifdef __arm__
+	__asm volatile (
+		"vmov.32		s0, %1		\n\t"
+		"vdup.32		d0, d0[0]	\n\t"
+		"vmov.64		d1, d0		\n\t"
+		"vrsqrte.f32	d0, d0		\n\t"
+		"vmul.f32		d2, d0, d0	\n\t"
+		"vrsqrts.f32	d1, d1, d2	\n\t"
+		"vmul.f32		d0, d0, d1	\n\t"
+
+		"vmov.32		%0, s0		\n\t"
+		:"+&r" (ret), "+&r" (x)
+		:
+		:"d0", "d1", "d2"
+	);
+	return ret;
+#else
 	int i;
 	float y, r;
 
@@ -276,6 +293,7 @@ ID_INLINE float idMath::RSqrt(float x)
 	r = *reinterpret_cast<float *>(&i);
 	r = r * (1.5f - r * r * y);
 	return r;
+#endif
 }
 
 ID_INLINE float idMath::InvSqrt16(float x)
