@@ -167,8 +167,8 @@ bool idAudioHardwareALSA::Initialize(void)
 		return false;
 	}
 
-	if ((err = id_snd_pcm_hw_params_set_format(m_pcm_handle, hwparams, SND_PCM_FORMAT_S16_LE)) < 0) {
-		common->Printf("SND_PCM_FORMAT_S16_LE failed: %s\n", id_snd_strerror(err));
+	if ((err = id_snd_pcm_hw_params_set_format(m_pcm_handle, hwparams, SND_PCM_FORMAT_S16)) < 0) {
+		common->Printf("SND_PCM_FORMAT_S16 failed: %s\n", id_snd_strerror(err));
 		InitFailed();
 		return false;
 	}

@@ -651,7 +651,7 @@ void RB_SetProgramEnvironmentSpace(void)
 
 	// we need the model matrix without it being combined with the view matrix
 	// so we can transform local vectors to global coordinates
-	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), space->modelMatrix);
+//	GL_UniformMatrix4fv(offsetof(shaderProgram_t, modelMatrix), space->modelMatrix);
 
 	// set the modelview matrix for the viewer
 	float	mat[16];
@@ -738,6 +738,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 	idDrawVert *ac = (idDrawVert *)vertexCache.Position(tri->ambientCache);
 	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
 	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), reinterpret_cast<void *>(&ac->st));
+	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, true, sizeof(idDrawVert), (void *)&ac->color);
 
 	for (stage = 0; stage < shader->GetNumStages() ; stage++) {
 		pStage = shader->GetStage(stage);
@@ -771,12 +772,10 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 				continue;
 			}
 
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, true, sizeof(idDrawVert), (void *)&ac->color);
 			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Tangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
 			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Bitangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
 			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Normal), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
 
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
 			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
 			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
@@ -836,7 +835,6 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 			glDisable(GL_FRAGMENT_PROGRAM_ARB);
 #endif
 
-			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
 			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
 			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
@@ -865,12 +863,6 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 		if ((pStage->drawStateBits & (GLS_SRCBLEND_BITS|GLS_DSTBLEND_BITS)) == (GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA)
 		    && color[3] <= 0) {
 			continue;
-		}
-
-		// select the vertex color source
-		if (pStage->vertexColor != SVC_IGNORE) {
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, true, sizeof(idDrawVert), (void *)&ac->color);
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 		}
 
 		static const float zero[4] = { 0, 0, 0, 0 };
@@ -967,6 +959,7 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	GL_SelectTexture(0);
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
 	// vertex color standard is SVC_IGNORE
 	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorModulate)), 0.0, 0.0, 0.0, 0.0);
 	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorAdd)), 1.0, 1.0, 1.0, 1.0);
@@ -1005,8 +998,7 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 #endif
 
 	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-
-	GL_UseProgram(NULL);
+	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
 
 	return i;
 }
@@ -1736,16 +1728,7 @@ void	RB_STD_DrawView(void)
 	RB_STD_FillDepthBuffer(drawSurfs, numDrawSurfs);
 
 	// main light renderer
-	switch (tr.backEndRenderer) {
-#if !defined(GL_ES_VERSION_2_0)
-		case BE_ARB2:
-			RB_ARB2_DrawInteractions();
-			break;
-#endif
-		case BE_GLSL:
-			RB_GLSL_DrawInteractions();
-			break;
-	}
+	RB_GLSL_DrawInteractions();
 
 	// disable stencil shadow test
 	glStencilFunc(GL_ALWAYS, 128, 255);

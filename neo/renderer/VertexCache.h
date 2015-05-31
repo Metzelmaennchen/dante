@@ -29,6 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 // vertex cache calls should only be made by the front end
 
 const int NUM_VERTEX_FRAMES = 2;
+static const int	EXPAND_HEADERS = 32;
 
 typedef enum {
 	TAG_FREE,
@@ -126,7 +127,7 @@ class idVertexCache
 		vertCache_t		*tempBuffers[NUM_VERTEX_FRAMES];		// allocated at startup
 		bool			tempOverflow;			// had to alloc a temp in static memory
 
-		idBlockAlloc<vertCache_t,1024>	headerAllocator;
+		idBlockAlloc<vertCache_t,EXPAND_HEADERS>	headerAllocator;
 
 		vertCache_t		freeStaticHeaders;		// head of doubly linked list
 		vertCache_t		freeDynamicHeaders;		// head of doubly linked list

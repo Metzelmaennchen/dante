@@ -55,7 +55,8 @@ void RB_SetDefaultGLState(void)
 	memset(&backEnd.glState, 0, sizeof(backEnd.glState));
 	backEnd.glState.forceGlState = true;
 
-	GL_UseProgram(NULL);
+	glUseProgram(0);
+	backEnd.glState.currentProgram = 0;
 
 	glClearDepthf(1.0f);
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -167,10 +168,8 @@ void GL_UseProgram(shaderProgram_t *program)
 		return;
 	}
 
-	glUseProgram(program ? program->program : 0);
+	glUseProgram(program->program);
 	backEnd.glState.currentProgram = program;
-
-	GL_CheckErrors();
 }
 
 /*
@@ -187,8 +186,6 @@ void GL_Uniform4fv(GLint location, const GLfloat *value)
 	}
 
 	glUniform4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, value);
-
-	GL_CheckErrors();
 }
 
 /*
@@ -205,8 +202,6 @@ void GL_UniformMatrix4fv(GLint location, const GLfloat *value)
 	}
 
 	glUniformMatrix4fv(*(GLint *)((char *)backEnd.glState.currentProgram + location), 1, GL_FALSE, value);
-
-	GL_CheckErrors();
 }
 
 /*
@@ -229,8 +224,6 @@ void GL_EnableVertexAttribArray(GLuint index)
 	}
 
 	glEnableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
-
-	GL_CheckErrors();
 }
 
 /*
@@ -253,8 +246,6 @@ void GL_DisableVertexAttribArray(GLuint index)
 	}
 
 	glDisableVertexAttribArray(*(GLint *)((char *)backEnd.glState.currentProgram + index));
-
-	GL_CheckErrors();
 }
 
 /*
@@ -280,8 +271,6 @@ void GL_VertexAttribPointer(GLuint index, GLint size, GLenum type,
 
 	glVertexAttribPointer(*(GLint *)((char *)backEnd.glState.currentProgram + index),
 	                      size, type, normalized, stride, pointer);
-
-	GL_CheckErrors();
 }
 
 /*

@@ -39,8 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 #define GL_DYNAMIC_DRAW	GL_DYNAMIC_DRAW_ARB
 #endif
 
-static const int	FRAME_MEMORY_BYTES = 0x200000;
-static const int	EXPAND_HEADERS = 1024;
+static const int	FRAME_MEMORY_BYTES = 0x400000;
 
 idCVar idVertexCache::r_showVertexCache("r_showVertexCache", "0", CVAR_INTEGER|CVAR_RENDERER, "");
 idCVar idVertexCache::r_vertexBufferMegs("r_vertexBufferMegs", "32", CVAR_INTEGER|CVAR_RENDERER, "");
@@ -185,6 +184,8 @@ idVertexCache::Init
 void idVertexCache::Init()
 {
 	cmdSystem->AddCommand("listVertexCache", R_ListVertexCache_f, CMD_FL_RENDERER, "lists vertex cache");
+    
+        common->Printf("idVertexCache::Init\n");
 
 	if (r_vertexBufferMegs.GetInteger() < 8) {
 		r_vertexBufferMegs.SetInteger(8);
@@ -272,6 +273,7 @@ void idVertexCache::Alloc(void *data, int size, vertCache_t **buffer, bool index
 			block->prev->next = block;
 
 			glGenBuffers(1, & block->vbo);
+//            common->Printf("Alloc: glGenBuffers(1, %d)\n", block->vbo);
 		}
 	}
 
@@ -400,12 +402,14 @@ there may still be future references to dynamically created surfaces.
 vertCache_t	*idVertexCache::AllocFrameTemp(void *data, int size)
 {
 	vertCache_t	*block;
+//        common->Printf("AllocFrameTemp for size %i\n", size);
 
 	if (size <= 0) {
 		common->Error("idVertexCache::AllocFrameTemp: size = %i\n", size);
 	}
 
 	if (dynamicAllocThisFrame + size > frameBytes) {
+//        common->Printf("  no room in temp block ??\n");
 		// if we don't have enough room in the temp block, allocate a static block,
 		// but immediately free it so it will get freed at the next frame
 		tempOverflow = true;
@@ -418,7 +422,7 @@ vertCache_t	*idVertexCache::AllocFrameTemp(void *data, int size)
 
 	// if we don't have any remaining unused headers, allocate some more
 	if (freeDynamicHeaders.next == &freeDynamicHeaders) {
-
+//        common->Printf("  no remainning unused headers, need to alloc more\n");
 		for (int i = 0; i < EXPAND_HEADERS; i++) {
 			block = headerAllocator.Alloc();
 			block->next = freeDynamicHeaders.next;
@@ -468,7 +472,8 @@ idVertexCache::EndFrame
 void idVertexCache::EndFrame()
 {
 	// display debug information
-	if (r_showVertexCache.GetBool()) {
+	if (r_showVertexCache.GetBool())
+    {
 		int	staticUseCount = 0;
 		int staticUseSize = 0;
 
@@ -481,7 +486,7 @@ void idVertexCache::EndFrame()
 
 		const char *frameOverflow = tempOverflow ? "(OVERFLOW)" : "";
 
-		common->Printf("vertex dynamic:%i=%ik%s, static alloc:%i=%ik used:%i=%ik total:%i=%ik\n",
+		common->Printf("EndFrame: vertex dynamic:%i=%ik%s, static alloc:%i=%ik used:%i=%ik total:%i=%ik\n",
 		               dynamicCountThisFrame, dynamicAllocThisFrame/1024, frameOverflow,
 		               staticCountThisFrame, staticAllocThisFrame/1024,
 		               staticUseCount, staticUseSize/1024,
@@ -504,6 +509,7 @@ void idVertexCache::EndFrame()
 
 	currentFrame = tr.frameCount;
 	listNum = currentFrame % NUM_VERTEX_FRAMES;
+//    common->Printf("EndFrame: listNum %i\n", listNum);
 	staticAllocThisFrame = 0;
 	staticCountThisFrame = 0;
 	dynamicAllocThisFrame = 0;

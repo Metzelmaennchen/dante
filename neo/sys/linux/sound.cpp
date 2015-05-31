@@ -246,7 +246,7 @@ bool idAudioHardwareOSS::Initialize()
 	}
 
 	// sample format -----------------------------------------------
-	requested_sample_format = AFMT_S16_LE;
+	requested_sample_format = AFMT_S16_NE;
 	m_sample_format = requested_sample_format;
 
 	if (ioctl(m_audio_fd, SNDCTL_DSP_SETFMT, &m_sample_format) == -1) {

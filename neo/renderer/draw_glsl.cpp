@@ -390,7 +390,7 @@ R_LinkGLSLShader
 links the GLSL vertex and fragment shaders together to form a GLSL program
 =================
 */
-static bool R_LinkGLSLShader(shaderProgram_t *shaderProgram, bool needsAttributes)
+static bool R_LinkGLSLShader(shaderProgram_t *shaderProgram)
 {
 	char buf[BUFSIZ];
 	int len;
@@ -402,13 +402,30 @@ static bool R_LinkGLSLShader(shaderProgram_t *shaderProgram, bool needsAttribute
 	glAttachShader(shaderProgram->program, shaderProgram->vertexShader);
 	glAttachShader(shaderProgram->program, shaderProgram->fragmentShader);
 
-	if (needsAttributes) {
-		glBindAttribLocation(shaderProgram->program, 0, "attr_Vertex");
+	// all shaders use at least vertex'es as an attribute
+//    shaderProgram->addAttribute("attr_Vertex");
+	glBindAttribLocation(shaderProgram->program, 0, "attr_Vertex");
+
+	if (shaderProgram == &interactionShader) {
+		common->Printf("BINDING ATTRIBS for interaction shader\n");
 		glBindAttribLocation(shaderProgram->program, 1, "attr_TexCoord");
 		glBindAttribLocation(shaderProgram->program, 2, "attr_Color");
 		glBindAttribLocation(shaderProgram->program, 3, "attr_Normal");
 		glBindAttribLocation(shaderProgram->program, 4, "attr_Tangent");
 		glBindAttribLocation(shaderProgram->program, 5, "attr_Bitangent");
+	} else if (shaderProgram == &shadowShader) {
+		common->Printf("BINDING ATTRIBS for shadow shader\n");
+		// No additional attributes needed atm
+	} else if (shaderProgram == &defaultShader) {
+		common->Printf("BINDING ATTRIBS for default shader\n");
+		glBindAttribLocation(shaderProgram->program, 1, "attr_TexCoord");
+		glBindAttribLocation(shaderProgram->program, 2, "attr_Color");
+	} else if (shaderProgram == &depthFillShader) {
+		common->Printf("BINDING ATTRIBS for depth fill shader\n");
+		glBindAttribLocation(shaderProgram->program, 1, "attr_TexCoord");
+	} else {
+		common->Error("R_LinkGLSLShader: program unknown, no attribute settings available\n");
+		return false;
 	}
 
 	glLinkProgram(shaderProgram->program);
@@ -460,7 +477,14 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 	char	buffer[32];
 
 	GL_UseProgram(shader);
-
+#if 0
+	if (shader == &shadowShader) {
+    	shader->modelViewProjectionMatrix = glGetUniformLocation(shader->program, "u_modelViewProjectionMatrix");
+		shader->glColor = glGetUniformLocation(shader->program, "u_glColor");
+		shader->localLightOrigin = glGetUniformLocation(shader->program, "u_lightOrigin");
+	} else 
+#endif
+	{
 	shader->localLightOrigin = glGetUniformLocation(shader->program, "u_lightOrigin");
 	shader->localViewOrigin = glGetUniformLocation(shader->program, "u_viewOrigin");
 	shader->lightProjectionS = glGetUniformLocation(shader->program, "u_lightProjectionS");
@@ -497,6 +521,7 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 	shader->attr_Normal = glGetAttribLocation(shader->program, "attr_Normal");
 	shader->attr_Vertex = glGetAttribLocation(shader->program, "attr_Vertex");
 	shader->attr_Color = glGetAttribLocation(shader->program, "attr_Color");
+	}
 
 	for (i = 0; i < MAX_VERTEX_PARMS; i++) {
 		idStr::snPrintf(buffer, sizeof(buffer), "u_vertexParm%d", i);
@@ -523,7 +548,7 @@ static bool RB_GLSL_InitShaders(void)
 	R_LoadGLSLShader("interaction.vert", &interactionShader, GL_VERTEX_SHADER);
 	R_LoadGLSLShader("interaction.frag", &interactionShader, GL_FRAGMENT_SHADER);
 
-	if (!R_LinkGLSLShader(&interactionShader, true) && !R_ValidateGLSLProgram(&interactionShader)) {
+	if (!R_LinkGLSLShader(&interactionShader) && !R_ValidateGLSLProgram(&interactionShader)) {
 		return false;
 	} else {
 		RB_GLSL_GetUniformLocations(&interactionShader);
@@ -533,7 +558,7 @@ static bool RB_GLSL_InitShaders(void)
 	R_LoadGLSLShader("shadow.vert", &shadowShader, GL_VERTEX_SHADER);
 	R_LoadGLSLShader("shadow.frag", &shadowShader, GL_FRAGMENT_SHADER);
 
-	if (!R_LinkGLSLShader(&shadowShader, true) && !R_ValidateGLSLProgram(&shadowShader)) {
+	if (!R_LinkGLSLShader(&shadowShader) && !R_ValidateGLSLProgram(&shadowShader)) {
 		return false;
 	} else {
 		RB_GLSL_GetUniformLocations(&shadowShader);
@@ -543,7 +568,7 @@ static bool RB_GLSL_InitShaders(void)
 	R_LoadGLSLShader("default.vert", &defaultShader, GL_VERTEX_SHADER);
 	R_LoadGLSLShader("default.frag", &defaultShader, GL_FRAGMENT_SHADER);
 
-	if (!R_LinkGLSLShader(&defaultShader, true) && !R_ValidateGLSLProgram(&defaultShader)) {
+	if (!R_LinkGLSLShader(&defaultShader) && !R_ValidateGLSLProgram(&defaultShader)) {
 		return false;
 	} else {
 		RB_GLSL_GetUniformLocations(&defaultShader);
@@ -553,7 +578,7 @@ static bool RB_GLSL_InitShaders(void)
 	R_LoadGLSLShader("zfill.vert", &depthFillShader, GL_VERTEX_SHADER);
 	R_LoadGLSLShader("zfill.frag", &depthFillShader, GL_FRAGMENT_SHADER);
 
-	if (!R_LinkGLSLShader(&depthFillShader, true) && !R_ValidateGLSLProgram(&depthFillShader)) {
+	if (!R_LinkGLSLShader(&depthFillShader) && !R_ValidateGLSLProgram(&depthFillShader)) {
 		return false;
 	} else {
 		RB_GLSL_GetUniformLocations(&depthFillShader);
