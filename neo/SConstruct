@@ -245,7 +245,7 @@ CORECPPPATH = [ ]
 CORELIBPATH = [ ]
 CORECPPFLAGS = [ ]
 GAMECPPFLAGS = [ ]
-BASELINKFLAGS = [ ]
+BASELINKFLAGS = [ '-fopenmp' ]
 CORELINKFLAGS = [ ]
 
 # for release build, further optimisations that may not work on all files
@@ -265,6 +265,8 @@ CORECPPFLAGS.append( '-DXTHREADS' )
 BASECPPFLAGS.append( '-fmessage-length=0' )
 # gcc 4.0
 BASECPPFLAGS.append( '-fpermissive' )
+# openmp for compressing to etc1
+BASECPPFLAGS.append( '-fopenmp' )
 
 if ( g_os == 'Linux' ):
 	# gcc 4.x option only - only export what we mean to from the game SO
