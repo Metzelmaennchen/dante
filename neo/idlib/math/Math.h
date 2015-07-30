@@ -243,6 +243,7 @@ class idMath
 		static const float			M_MS2SEC;					// milliseconds to seconds multiplier
 		static const float			INFINITY;					// huge number which should be larger than any valid number used
 		static const float			FLT_EPSILON;				// smallest positive number such that 1.0+FLT_EPSILON != 1.0
+		static const float			FLT_SMALLEST_NON_DENORMAL;	// smallest non-denormal 32-bit floating point value
 
 	private:
 		enum {
@@ -266,65 +267,17 @@ class idMath
 
 ID_INLINE float idMath::RSqrt(float x)
 {
-
-#ifdef __arm__
-	__asm volatile (
-		"vmov.32		s0, %1		\n\t"
-		"vdup.32		d0, d0[0]	\n\t"
-		"vmov.64		d1, d0		\n\t"
-		"vrsqrte.f32	d0, d0		\n\t"
-		"vmul.f32		d2, d0, d0	\n\t"
-		"vrsqrts.f32	d1, d1, d2	\n\t"
-		"vmul.f32		d0, d0, d1	\n\t"
-
-		"vmov.32		%0, s0		\n\t"
-		:"+&r" (ret), "+&r" (x)
-		:
-		:"d0", "d1", "d2"
-	);
-	return ret;
-#else
-	int i;
-	float y, r;
-
-	y = x * 0.5f;
-	i = *reinterpret_cast<int *>(&x);
-	i = 0x5f3759df - (i >> 1);
-	r = *reinterpret_cast<float *>(&i);
-	r = r * (1.5f - r * r * y);
-	return r;
-#endif
+	return ( x > FLT_SMALLEST_NON_DENORMAL ) ? sqrtf( 1.0f / x ) : INFINITY;
 }
 
 ID_INLINE float idMath::InvSqrt16(float x)
 {
-
-	dword a = ((union _flint *)(&x))->i;
-	union _flint seed;
-
-	assert(initialized);
-
-	double y = x * 0.5f;
-	seed.i = ((((3*EXP_BIAS-1) - ((a >> EXP_POS) & 0xFF)) >> 1)<<EXP_POS) | iSqrt[(a >> (EXP_POS-LOOKUP_BITS)) & LOOKUP_MASK];
-	double r = seed.f;
-	r = r * (1.5f - r * r * y);
-	return (float) r;
+	return ( x > FLT_SMALLEST_NON_DENORMAL ) ? sqrtf( 1.0f / x ) : INFINITY;
 }
 
 ID_INLINE float idMath::InvSqrt(float x)
 {
-
-	dword a = ((union _flint *)(&x))->i;
-	union _flint seed;
-
-	assert(initialized);
-
-	double y = x * 0.5f;
-	seed.i = ((((3*EXP_BIAS-1) - ((a >> EXP_POS) & 0xFF)) >> 1)<<EXP_POS) | iSqrt[(a >> (EXP_POS-LOOKUP_BITS)) & LOOKUP_MASK];
-	double r = seed.f;
-	r = r * (1.5f - r * r * y);
-	r = r * (1.5f - r * r * y);
-	return (float) r;
+	return ( x > FLT_SMALLEST_NON_DENORMAL ) ? sqrtf( 1.0f / x ) : INFINITY;
 }
 
 ID_INLINE double idMath::InvSqrt64(float x)
