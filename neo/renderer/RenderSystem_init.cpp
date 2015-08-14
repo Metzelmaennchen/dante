@@ -327,9 +327,6 @@ static void R_CheckPortableExtensions(void)
 	// GL_EXT_shared_texture_palette
 	glConfig.sharedTexturePaletteAvailable = R_CheckExtension("GL_EXT_shared_texture_palette");
 
-	// GL_EXT_texture3D (not currently used for anything)
-	glConfig.texture3DAvailable = R_CheckExtension("GL_EXT_texture3D");
-
 	// EXT_stencil_wrap
 	tr.stencilIncr = GL_INCR_WRAP;
 	tr.stencilDecr = GL_DECR_WRAP;

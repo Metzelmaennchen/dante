@@ -128,7 +128,6 @@ typedef enum {
 typedef enum {
 	TT_DISABLED,
 	TT_2D,
-	TT_3D,
 	TT_CUBIC,
 	TT_RECT
 } textureType_t;
@@ -147,12 +146,12 @@ class idImage
 		idImage();
 
 		// Makes this image active on the current GL texture unit.
-		// automatically enables or disables cube mapping or texture3D
+		// automatically enables or disables cube mapping
 		// May perform file loading if the image was not preloaded.
 		// May start a background image read.
 		void		Bind();
 
-		// for use with fragment programs, doesn't change any enable2D/3D/cube states
+		// for use with fragment programs, doesn't change any enable2D/cube states
 		void		BindFragment();
 
 		// deletes the texture object, but leaves the structure so it can be reloaded
@@ -165,11 +164,6 @@ class idImage
 		void		GenerateImage(const byte *pic, int width, int height,
 		                              textureFilter_t filter, bool allowDownSize,
 		                              textureRepeat_t repeat, textureDepth_t depth);
-#if !defined(GL_ES_VERSION_2_0)
-		void		Generate3DImage(const byte *pic, int width, int height, int depth,
-		                                textureFilter_t filter, bool allowDownSize,
-		                                textureRepeat_t repeat, textureDepth_t minDepth);
-#endif
 		void		GenerateCubeImage(const byte *pic[6], int size,
 		                                  textureFilter_t filter, bool allowDownSize,
 		                                  textureDepth_t depth);
@@ -464,11 +458,9 @@ byte *R_ResampleTexture(const byte *in, int inwidth, int inheight,
                         int outwidth, int outheight);
 byte *R_MipMapWithAlphaSpecularity(const byte *in, int width, int height);
 byte *R_MipMap(const byte *in, int width, int height, bool preserveBorder);
-byte *R_MipMap3D(const byte *in, int width, int height, int depth, bool preserveBorder);
 
 // these operate in-place on the provided pixels
 void R_SetBorderTexels(byte *inBase, int width, int height, const byte border[4]);
-void R_SetBorderTexels3D(byte *inBase, int width, int height, int depth, const byte border[4]);
 void R_BlendOverTexture(byte *data, int pixelCount, const byte blend[4]);
 void R_HorizontalFlip(byte *data, int width, int height);
 void R_VerticalFlip(byte *data, int width, int height);

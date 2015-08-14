@@ -799,147 +799,6 @@ void idImage::GenerateImage(const byte *pic, int width, int height,
 }
 
 
-#if !defined(GL_ES_VERSION_2_0)
-/*
-==================
-Generate3DImage
-==================
-*/
-void idImage::Generate3DImage(const byte *pic, int width, int height, int picDepth,
-                              textureFilter_t filterParm, bool allowDownSizeParm,
-                              textureRepeat_t repeatParm, textureDepth_t minDepthParm)
-{
-	int			scaled_width, scaled_height, scaled_depth;
-
-	PurgeImage();
-
-	filter = filterParm;
-	allowDownSize = allowDownSizeParm;
-	repeat = repeatParm;
-	depth = minDepthParm;
-
-	// if we don't have a rendering context, just return after we
-	// have filled in the parms.  We must have the values set, or
-	// an image match from a shader before OpenGL starts would miss
-	// the generated texture
-	if (!glConfig.isInitialized) {
-		return;
-	}
-
-	// make sure it is a power of 2
-	scaled_width = MakePowerOfTwo(width);
-	scaled_height = MakePowerOfTwo(height);
-	scaled_depth = MakePowerOfTwo(picDepth);
-
-	if (scaled_width != width || scaled_height != height || scaled_depth != picDepth) {
-		common->Error("R_Create3DImage: not a power of 2 image");
-	}
-
-	// FIXME: allow picmip here
-
-	// generate the texture number
-	glGenTextures(1, &texnum);
-
-	// select proper internal format before we resample
-	// this function doesn't need to know it is 3D, so just make it very "tall"
-	internalFormat = SelectInternalFormat(&pic, 1, width, height * picDepth, minDepthParm);
-
-	uploadHeight = scaled_height;
-	uploadWidth = scaled_width;
-	uploadDepth = scaled_depth;
-
-
-	type = TT_3D;
-
-	// upload the main image level
-	Bind();
-
-	glTexImage3D(GL_TEXTURE_3D, 0, internalFormat, scaled_width, scaled_height, scaled_depth,
-	              0, GL_RGBA, GL_UNSIGNED_BYTE, pic);
-
-	// create and upload the mip map levels
-	int		miplevel;
-	byte	*scaledBuffer, *shrunk;
-
-	scaledBuffer = (byte *)R_StaticAlloc(scaled_width * scaled_height * scaled_depth * 4);
-	memcpy(scaledBuffer, pic, scaled_width * scaled_height * scaled_depth * 4);
-	miplevel = 0;
-
-	while (scaled_width > 1 || scaled_height > 1 || scaled_depth > 1) {
-		// preserve the border after mip map unless repeating
-		shrunk = R_MipMap3D(scaledBuffer, scaled_width, scaled_height, scaled_depth,
-		                    (bool)(repeat != TR_REPEAT));
-		R_StaticFree(scaledBuffer);
-		scaledBuffer = shrunk;
-
-		scaled_width >>= 1;
-		scaled_height >>= 1;
-		scaled_depth >>= 1;
-
-		if (scaled_width < 1) {
-			scaled_width = 1;
-		}
-
-		if (scaled_height < 1) {
-			scaled_height = 1;
-		}
-
-		if (scaled_depth < 1) {
-			scaled_depth = 1;
-		}
-
-		miplevel++;
-
-		// upload the mip map
-		glTexImage3D(GL_TEXTURE_3D, miplevel, internalFormat, scaled_width, scaled_height, scaled_depth,
-		              0, GL_RGBA, GL_UNSIGNED_BYTE, scaledBuffer);
-	}
-
-	R_StaticFree(scaledBuffer);
-
-	// set the minimize / maximize filtering
-	switch (filter) {
-		case TF_DEFAULT:
-			glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, globalImages->textureMinFilter);
-			glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, globalImages->textureMaxFilter);
-			break;
-		case TF_LINEAR:
-			glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			break;
-		case TF_NEAREST:
-			glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			break;
-		default:
-			common->FatalError("R_CreateImage: bad texture filter");
-	}
-
-	// set the wrap/clamp modes
-	switch (repeat) {
-		case TR_REPEAT:
-			glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-			break;
-		case TR_CLAMP_TO_BORDER:
-		case TR_CLAMP_TO_ZERO:
-		case TR_CLAMP_TO_ZERO_ALPHA:
-		case TR_CLAMP:
-			glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-			break;
-		default:
-			common->FatalError("R_CreateImage: bad texture repeat");
-	}
-
-	// see if we messed anything up
-	GL_CheckErrors();
-}
-#endif
-
-
 /*
 ====================
 GenerateCubeImage
@@ -1801,7 +1660,6 @@ void idImage::PurgeImage()
 	// clear all the current binding caches, so the next bind will do a real one
 	for (int i = 0 ; i < MAX_MULTITEXTURE_UNITS ; i++) {
 		backEnd.glState.tmu[i].current2DMap = -1;
-		backEnd.glState.tmu[i].current3DMap = -1;
 		backEnd.glState.tmu[i].currentCubeMap = -1;
 	}
 }
@@ -1810,7 +1668,7 @@ void idImage::PurgeImage()
 ==============
 Bind
 
-Automatically enables 2D mapping, cube mapping, or 3D texturing if needed
+Automatically enables 2D mapping or cube mapping texturing if needed
 ==============
 */
 void idImage::Bind()
@@ -1865,16 +1723,12 @@ void idImage::Bind()
 #if !defined(GL_ES_VERSION_2_0)
 		if (tmu->textureType == TT_CUBIC) {
 			glDisable(GL_TEXTURE_CUBE_MAP);
-		} else if (tmu->textureType == TT_3D) {
-			glDisable(GL_TEXTURE_3D);
 		} else if (tmu->textureType == TT_2D) {
 			glDisable(GL_TEXTURE_2D);
 		}
 
 		if (type == TT_CUBIC) {
 			glEnable(GL_TEXTURE_CUBE_MAP);
-		} else if (type == TT_3D) {
-			glEnable(GL_TEXTURE_3D);
 		} else if (type == TT_2D) {
 			glEnable(GL_TEXTURE_2D);
 		}
@@ -1895,14 +1749,6 @@ void idImage::Bind()
 			glBindTexture(GL_TEXTURE_CUBE_MAP, texnum);
 		}
 	}
-#if !defined(GL_ES_VERSION_2_0)
-	else if (type == TT_3D) {
-		if (tmu->current3DMap != texnum) {
-			tmu->current3DMap = texnum;
-			glBindTexture(GL_TEXTURE_3D, texnum);
-		}
-	}
-#endif
 }
 
 /*
@@ -1970,11 +1816,6 @@ void idImage::BindFragment()
 	else if (type == TT_CUBIC) {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, texnum);
 	}
-#if !defined(GL_ES_VERSION_2_0)
-	else if (type == TT_3D) {
-		glBindTexture(GL_TEXTURE_3D, texnum);
-	}
-#endif
 }
 
 
@@ -2210,9 +2051,6 @@ int idImage::StorageSize() const
 		case TT_2D:
 			baseSize = uploadWidth*uploadHeight;
 			break;
-		case TT_3D:
-			baseSize = uploadWidth*uploadHeight*uploadDepth;
-			break;
 		case TT_CUBIC:
 			baseSize = 6 * uploadWidth*uploadHeight;
 			break;
@@ -2246,9 +2084,6 @@ void idImage::Print() const
 	switch (type) {
 		case TT_2D:
 			common->Printf(" ");
-			break;
-		case TT_3D:
-			common->Printf("3");
 			break;
 		case TT_CUBIC:
 			common->Printf("C");

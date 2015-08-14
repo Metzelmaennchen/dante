@@ -94,10 +94,6 @@ void RB_SetDefaultGLState(void)
 
 		glDisable(GL_TEXTURE_2D);
 
-		if (glConfig.texture3DAvailable) {
-			glDisable(GL_TEXTURE_3D);
-		}
-
 		if (glConfig.cubeMapAvailable) {
 			glDisable(GL_TEXTURE_CUBE_MAP);
 		}
