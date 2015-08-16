@@ -2074,30 +2074,6 @@ int idImageManager::SumOfUsedImages()
 
 /*
 ===============
-BindNull
-===============
-*/
-void idImageManager::BindNull()
-{
-	tmu_t			*tmu;
-
-	tmu = &backEnd.glState.tmu[backEnd.glState.currenttmu];
-
-	RB_LogComment("BindNull()\n");
-
-#if !defined(GL_ES_VERSION_2_0)
-	if (tmu->textureType == TT_CUBIC) {
-		glDisable(GL_TEXTURE_CUBE_MAP);
-	} else if (tmu->textureType == TT_2D) {
-		glDisable(GL_TEXTURE_2D);
-	}
-#endif
-
-	tmu->textureType = TT_DISABLED;
-}
-
-/*
-===============
 Init
 ===============
 */

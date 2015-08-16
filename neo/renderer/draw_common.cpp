@@ -266,7 +266,6 @@ void RB_FinishStageTexturing(const shaderStage_t *pStage, const drawSurf_t *surf
 
 	if (pStage->texture.texgen == TG_GLASSWARP) {
 		GL_SelectTexture(2);
-		globalImages->BindNull();
 
 		GL_SelectTexture(1);
 
@@ -276,7 +275,6 @@ void RB_FinishStageTexturing(const shaderStage_t *pStage, const drawSurf_t *surf
 		glDisable(GL_TEXTURE_GEN_T);
 		glDisable(GL_TEXTURE_GEN_Q);
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
-		globalImages->BindNull();
 		GL_SelectTexture(0);
 	}
 
@@ -287,7 +285,6 @@ void RB_FinishStageTexturing(const shaderStage_t *pStage, const drawSurf_t *surf
 		if (bumpStage) {
 			// per-pixel reflection mapping with bump mapping
 			GL_SelectTexture(1);
-			globalImages->BindNull();
 			GL_SelectTexture(0);
 
 			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
@@ -542,7 +539,6 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 #if !defined(GL_ES_VERSION_2_0)
 	if (backEnd.viewDef->numClipPlanes) {
 		GL_SelectTexture(1);
-		globalImages->BindNull();
 		glDisable(GL_TEXTURE_GEN_S);
 		GL_SelectTexture(0);
 	}
@@ -821,7 +817,6 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 			for (int i = 1 ; i < newStage->numFragmentProgramImages ; i++) {
 				if (newStage->fragmentProgramImages[i]) {
 					GL_SelectTexture(i);
-					globalImages->BindNull();
 				}
 			}
 
@@ -955,7 +950,6 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 	GL_UseProgram(&defaultShader);
 
 	GL_SelectTexture(1);
-	globalImages->BindNull();
 
 	GL_SelectTexture(0);
 	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
@@ -1185,8 +1179,6 @@ void RB_StencilShadowPass(const drawSurf_t *drawSurfs)
 
 	RB_LogComment("---------- RB_StencilShadowPass ----------\n");
 
-	globalImages->BindNull();
-
 	// for visualizing the shadows
 	if (r_showShadows.GetInteger()) {
 		if (r_showShadows.GetInteger() == 2) {
@@ -1367,7 +1359,6 @@ static void RB_BlendLight(const drawSurf_t *drawSurfs,  const drawSurf_t *drawSu
 
 	GL_SelectTexture(1);
 	glDisable(GL_TEXTURE_GEN_S);
-	globalImages->BindNull();
 
 	GL_SelectTexture(0);
 	glDisable(GL_TEXTURE_GEN_S);
@@ -1537,7 +1528,6 @@ static void RB_FogPass(const drawSurf_t *drawSurfs,  const drawSurf_t *drawSurfs
 	GL_SelectTexture(1);
 	glDisable(GL_TEXTURE_GEN_S);
 	glDisable(GL_TEXTURE_GEN_T);
-	globalImages->BindNull();
 
 	GL_SelectTexture(0);
 	glDisable(GL_TEXTURE_GEN_S);
@@ -1664,7 +1654,6 @@ void RB_STD_LightScale(void)
 
 	GL_State(GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_SRC_COLOR);
 	GL_Cull(CT_TWO_SIDED);	// so mirror views also get it
-	globalImages->BindNull();
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_STENCIL_TEST);
 

@@ -1716,28 +1716,8 @@ void idImage::Bind()
 	frameUsed = backEnd.frameCount;
 	bindCount++;
 
-	tmu_t			*tmu = &backEnd.glState.tmu[backEnd.glState.currenttmu];
-
-	// enable or disable apropriate texture modes
-	if (tmu->textureType != type && (backEnd.glState.currenttmu <	glConfig.maxTextureUnits)) {
-#if !defined(GL_ES_VERSION_2_0)
-		if (tmu->textureType == TT_CUBIC) {
-			glDisable(GL_TEXTURE_CUBE_MAP);
-		} else if (tmu->textureType == TT_2D) {
-			glDisable(GL_TEXTURE_2D);
-		}
-
-		if (type == TT_CUBIC) {
-			glEnable(GL_TEXTURE_CUBE_MAP);
-		} else if (type == TT_2D) {
-			glEnable(GL_TEXTURE_2D);
-		}
-#endif
-
-		tmu->textureType = type;
-	}
-
 	// bind the texture
+	tmu_t			*tmu = &backEnd.glState.tmu[backEnd.glState.currenttmu];
 	if (type == TT_2D) {
 		if (tmu->current2DMap != texnum) {
 			tmu->current2DMap = texnum;

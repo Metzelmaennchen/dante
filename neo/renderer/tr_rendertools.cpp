@@ -465,7 +465,6 @@ void RB_ShowIntensity(void)
 	glRasterPos2f(0, 0);
 	glPopMatrix();
 	glColor3f(1, 1, 1);
-	globalImages->BindNull();
 	glMatrixMode(GL_MODELVIEW);
 
 	glDrawPixels(glConfig.vidWidth, glConfig.vidHeight, GL_RGBA , GL_UNSIGNED_BYTE, colorReadback);
@@ -508,7 +507,6 @@ void RB_ShowDepthBuffer(void)
 
 	GL_State(GLS_DEPTHFUNC_ALWAYS);
 	glColor3f(1, 1, 1);
-	globalImages->BindNull();
 
 	depthReadback = R_StaticAlloc(glConfig.vidWidth * glConfig.vidHeight*4);
 	memset(depthReadback, 0, glConfig.vidWidth * glConfig.vidHeight*4);
@@ -620,7 +618,6 @@ void RB_ShowSilhouette(void)
 	// clear all triangle edges to black
 	//
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	globalImages->BindNull();
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_STENCIL_TEST);
 
@@ -820,7 +817,6 @@ static void RB_ShowTris(drawSurf_t **drawSurfs, int numDrawSurfs)
 	}
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	globalImages->BindNull();
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_STENCIL_TEST);
 
@@ -883,7 +879,6 @@ static void RB_ShowSurfaceInfo(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 #if !defined(GL_ES_VERSION_2_0)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	globalImages->BindNull();
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_STENCIL_TEST);
 
@@ -944,7 +939,6 @@ static void RB_ShowViewEntitys(viewEntity_t *vModels)
 	}
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	globalImages->BindNull();
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_STENCIL_TEST);
 
@@ -1015,7 +1009,6 @@ static void RB_ShowTexturePolarity(drawSurf_t **drawSurfs, int numDrawSurfs)
 	}
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	globalImages->BindNull();
 	glDisable(GL_STENCIL_TEST);
 
 	GL_State(GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA);
@@ -1092,7 +1085,6 @@ static void RB_ShowUnsmoothedTangents(drawSurf_t **drawSurfs, int numDrawSurfs)
 	}
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	globalImages->BindNull();
 	glDisable(GL_STENCIL_TEST);
 
 	GL_State(GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA);
@@ -1153,7 +1145,6 @@ static void RB_ShowTangentSpace(drawSurf_t **drawSurfs, int numDrawSurfs)
 	}
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	globalImages->BindNull();
 	glDisable(GL_STENCIL_TEST);
 
 	GL_State(GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA);
@@ -1216,7 +1207,6 @@ static void RB_ShowVertexColor(drawSurf_t **drawSurfs, int numDrawSurfs)
 	}
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	globalImages->BindNull();
 	glDisable(GL_STENCIL_TEST);
 
 	GL_State(GLS_DEPTHFUNC_LESS);
@@ -1274,8 +1264,6 @@ static void RB_ShowNormals(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	GL_State(GLS_POLYMODE_LINE);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	globalImages->BindNull();
 	glDisable(GL_STENCIL_TEST);
 
 	if (!r_debugLineDepthTest.GetBool()) {
@@ -1375,8 +1363,6 @@ static void RB_AltShowNormals(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	GL_State(GLS_DEFAULT);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	globalImages->BindNull();
 	glDisable(GL_STENCIL_TEST);
 	glDisable(GL_DEPTH_TEST);
 
@@ -1456,8 +1442,6 @@ static void RB_ShowTextureVectors(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	GL_State(GLS_DEPTHFUNC_LESS);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	globalImages->BindNull();
 
 	for (i = 0 ; i < numDrawSurfs ; i++) {
 		drawSurf = drawSurfs[i];
@@ -1563,8 +1547,6 @@ static void RB_ShowDominantTris(drawSurf_t **drawSurfs, int numDrawSurfs)
 	glPolygonOffset(-1, -2);
 	glEnable(GL_POLYGON_OFFSET_LINE);
 
-	globalImages->BindNull();
-
 	for (i = 0 ; i < numDrawSurfs ; i++) {
 		drawSurf = drawSurfs[i];
 
@@ -1628,8 +1610,6 @@ static void RB_ShowEdges(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	GL_State(GLS_DEFAULT);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	globalImages->BindNull();
 	glDisable(GL_DEPTH_TEST);
 
 	for (i = 0 ; i < numDrawSurfs ; i++) {
@@ -1739,7 +1719,6 @@ void RB_ShowLights(void)
 	RB_SimpleWorldSetup();
 
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	globalImages->BindNull();
 	glDisable(GL_STENCIL_TEST);
 
 
@@ -1813,7 +1792,6 @@ void RB_ShowPortals(void)
 	// all portals are expressed in world coordinates
 	RB_SimpleWorldSetup();
 
-	globalImages->BindNull();
 	glDisable(GL_DEPTH_TEST);
 
 	GL_State(GLS_DEFAULT);
@@ -2052,8 +2030,6 @@ void RB_ShowDebugText(void)
 	// all lines are expressed in world coordinates
 	RB_SimpleWorldSetup();
 
-	globalImages->BindNull();
-
 	width = r_debugLineWidth.GetInteger();
 
 	if (width < 1) {
@@ -2171,8 +2147,6 @@ void RB_ShowDebugLines(void)
 
 	// all lines are expressed in world coordinates
 	RB_SimpleWorldSetup();
-
-	globalImages->BindNull();
 
 	width = r_debugLineWidth.GetInteger();
 
@@ -2302,8 +2276,6 @@ void RB_ShowDebugPolygons(void)
 
 	// all lines are expressed in world coordinates
 	RB_SimpleWorldSetup();
-
-	globalImages->BindNull();
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_STENCIL_TEST);

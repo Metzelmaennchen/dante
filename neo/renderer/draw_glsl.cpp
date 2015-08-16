@@ -221,19 +221,10 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 
 	// disable features
 	GL_SelectTextureNoClient(5);
-	globalImages->BindNull();
-
 	GL_SelectTextureNoClient(4);
-	globalImages->BindNull();
-
 	GL_SelectTextureNoClient(3);
-	globalImages->BindNull();
-
 	GL_SelectTextureNoClient(2);
-	globalImages->BindNull();
-
 	GL_SelectTextureNoClient(1);
-	globalImages->BindNull();
 
 	backEnd.glState.currenttmu = -1;
 	GL_SelectTexture(0);

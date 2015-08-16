@@ -332,9 +332,6 @@ class idImageManager
 		// reloads all apropriate images after a vid_restart
 		void				ReloadAllImages();
 
-		// disable the active texture unit
-		void				BindNull();
-
 		// Mark all file based images as currently unused,
 		// but don't free anything.  Calls to ImageFromFile() will
 		// either mark the image as used, or create a new image without
