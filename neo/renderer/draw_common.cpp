@@ -91,13 +91,11 @@ void RB_PrepareStageTexturing(const shaderStage_t *pStage,  const drawSurf_t *su
 
 	// texgens
 	if (pStage->texture.texgen == TG_DIFFUSE_CUBE) {
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 3, GL_FLOAT, false, sizeof(idDrawVert),
-		                       ac->normal.ToFloatPtr());
+		glVertexAttribPointer(ATTR_TEXCOORD, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
 	}
 
 	if (pStage->texture.texgen == TG_SKYBOX_CUBE || pStage->texture.texgen == TG_WOBBLESKY_CUBE) {
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 3, GL_FLOAT, false, 0,
-		                       vertexCache.Position(surf->dynamicTexCoords));
+		glVertexAttribPointer(ATTR_TEXCOORD, 3, GL_FLOAT, false, 0, vertexCache.Position(surf->dynamicTexCoords));
 	}
 
 #if !defined(GL_ES_VERSION_2_0)
@@ -205,12 +203,12 @@ void RB_PrepareStageTexturing(const shaderStage_t *pStage,  const drawSurf_t *su
 			GL_SelectTexture(0);
 
 			glNormalPointer(GL_FLOAT, sizeof(idDrawVert), ac->normal.ToFloatPtr());
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Bitangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Tangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
+			glVertexAttribPointer(ATTR_BITANGENT, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
+			glVertexAttribPointer(ATTR_TANGENT, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
 
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
+			glEnableVertexAttribArray(ATTR_TANGENT);
+			glEnableVertexAttribArray(ATTR_BITANGENT);
+			glEnableVertexAttribArray(ATTR_NORMAL);
 
 			// Program env 5, 6, 7, 8 have been set in RB_SetProgramEnvironmentSpace
 
@@ -221,7 +219,7 @@ void RB_PrepareStageTexturing(const shaderStage_t *pStage,  const drawSurf_t *su
 		} else {
 			// per-pixel reflection mapping without a normal map
 			glNormalPointer(GL_FLOAT, sizeof(idDrawVert), ac->normal.ToFloatPtr());
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
+			glEnableVertexAttribArray(ATTR_NORMAL);
 
 			glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, FPROG_ENVIRONMENT);
 			glEnable(GL_FRAGMENT_PROGRAM_ARB);
@@ -247,7 +245,7 @@ void RB_FinishStageTexturing(const shaderStage_t *pStage, const drawSurf_t *surf
 
 	if (pStage->texture.texgen == TG_DIFFUSE_CUBE || pStage->texture.texgen == TG_SKYBOX_CUBE
 	    || pStage->texture.texgen == TG_WOBBLESKY_CUBE) {
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), (void *)&ac->st);
+		glVertexAttribPointer(ATTR_TEXCOORD, 2, GL_FLOAT, false, sizeof(idDrawVert), (void *)&ac->st);
 	}
 
 #if !defined(GL_ES_VERSION_2_0)
@@ -287,13 +285,13 @@ void RB_FinishStageTexturing(const shaderStage_t *pStage, const drawSurf_t *surf
 			GL_SelectTexture(1);
 			GL_SelectTexture(0);
 
-			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
-			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
+			glDisableVertexAttribArray(ATTR_TANGENT);
+			glDisableVertexAttribArray(ATTR_BITANGENT);
 		} else {
 			// per-pixel reflection mapping without bump mapping
 		}
 
-		GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
+		glDisableVertexAttribArray(ATTR_NORMAL);
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
 		glDisable(GL_VERTEX_PROGRAM_ARB);
 	}
@@ -405,8 +403,8 @@ void RB_T_FillDepthBuffer(const drawSurf_t *surf)
 	}
 
 	idDrawVert *ac = (idDrawVert *)vertexCache.Position(tri->ambientCache);
-	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
-	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), reinterpret_cast<void *>(&ac->st));
+	glVertexAttribPointer(ATTR_VERTEX, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
+	glVertexAttribPointer(ATTR_TEXCOORD, 2, GL_FLOAT, false, sizeof(idDrawVert), reinterpret_cast<void *>(&ac->st));
 
 	bool drawSolid = false;
 
@@ -513,7 +511,7 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 	if (backEnd.viewDef->numClipPlanes) {
 		GL_SelectTexture(1);
 		globalImages->alphaNotchImage->Bind();
-		GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+		glDisableVertexAttribArray(ATTR_TEXCOORD);
 		glEnable(GL_TEXTURE_GEN_S);
 		glTexCoord2f(1, 0.5);
 	}
@@ -521,7 +519,7 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 
 	// the first texture will be used for alpha tested surfaces
 	GL_SelectTexture(0);
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	glEnableVertexAttribArray(ATTR_TEXCOORD);
 
 	// decal surfaces may enable polygon offset
 	glPolygonOffset(r_offsetFactor.GetFloat(), r_offsetUnits.GetFloat());
@@ -544,7 +542,7 @@ void RB_STD_FillDepthBuffer(drawSurf_t **drawSurfs, int numDrawSurfs)
 	}
 #endif
 
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	glDisableVertexAttribArray(ATTR_TEXCOORD);
 
 	GL_UseProgram(NULL);
 }
@@ -732,9 +730,9 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 	}
 
 	idDrawVert *ac = (idDrawVert *)vertexCache.Position(tri->ambientCache);
-	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
-	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), reinterpret_cast<void *>(&ac->st));
-	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, true, sizeof(idDrawVert), (void *)&ac->color);
+	glVertexAttribPointer(ATTR_VERTEX, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
+	glVertexAttribPointer(ATTR_TEXCOORD, 2, GL_FLOAT, false, sizeof(idDrawVert), reinterpret_cast<void *>(&ac->st));
+	glVertexAttribPointer(ATTR_COLOR, 4, GL_UNSIGNED_BYTE, true, sizeof(idDrawVert), (void *)&ac->color);
 
 	for (stage = 0; stage < shader->GetNumStages() ; stage++) {
 		pStage = shader->GetStage(stage);
@@ -768,13 +766,13 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 				continue;
 			}
 
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Tangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Bitangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
-			GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Normal), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
+			glVertexAttribPointer(ATTR_TANGENT, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
+			glVertexAttribPointer(ATTR_BITANGENT, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
+			glVertexAttribPointer(ATTR_NORMAL, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
 
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
-			GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
+			glEnableVertexAttribArray(ATTR_TANGENT);
+			glEnableVertexAttribArray(ATTR_BITANGENT);
+			glEnableVertexAttribArray(ATTR_NORMAL);
 
 			GL_State(pStage->drawStateBits);
 
@@ -830,9 +828,9 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 			glDisable(GL_FRAGMENT_PROGRAM_ARB);
 #endif
 
-			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
-			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
-			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
+			glDisableVertexAttribArray(ATTR_TANGENT);
+			glDisableVertexAttribArray(ATTR_BITANGENT);
+			glDisableVertexAttribArray(ATTR_NORMAL);
 			continue;
 		}
 
@@ -898,7 +896,7 @@ void RB_STD_T_RenderShaderPasses(const drawSurf_t *surf)
 		RB_FinishStageTexturing(pStage, surf, ac);
 
 		if (pStage->vertexColor != SVC_IGNORE) {
-			GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
+			glDisableVertexAttribArray(ATTR_COLOR);
 		}
 	}
 
@@ -952,8 +950,8 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 	GL_SelectTexture(1);
 
 	GL_SelectTexture(0);
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
+	glEnableVertexAttribArray(ATTR_TEXCOORD);
+	glEnableVertexAttribArray(ATTR_COLOR);	// gl_Color
 	// vertex color standard is SVC_IGNORE
 	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorModulate)), 0.0, 0.0, 0.0, 0.0);
 	glUniform4f(*(GLint *)((char *)backEnd.glState.currentProgram + offsetof(shaderProgram_t, colorAdd)), 1.0, 1.0, 1.0, 1.0);
@@ -991,8 +989,8 @@ int RB_STD_DrawShaderPasses(drawSurf_t **drawSurfs, int numDrawSurfs)
 	glColor4f(1, 1, 1, 1);
 #endif
 
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));
+	glDisableVertexAttribArray(ATTR_TEXCOORD);
+	glDisableVertexAttribArray(ATTR_COLOR);
 
 	return i;
 }
@@ -1044,7 +1042,7 @@ static void RB_T_Shadow(const drawSurf_t *surf)
 		return;
 	}
 
-	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 4, GL_FLOAT, false, sizeof(shadowCache_t),
+	glVertexAttribPointer(ATTR_VERTEX, 4, GL_FLOAT, false, sizeof(shadowCache_t),
 			vertexCache.Position(tri->shadowCache));
 
 	// we always draw the sil planes, but we may not need to draw the front or rear caps
@@ -1273,10 +1271,10 @@ static void RB_T_BlendLight(const drawSurf_t *surf)
 	// this gets used for both blend lights and shadow draws
 	if (tri->ambientCache) {
 		idDrawVert	*ac = (idDrawVert *)vertexCache.Position(tri->ambientCache);
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
+		glVertexAttribPointer(ATTR_VERTEX, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
 	} else if (tri->shadowCache) {
 		shadowCache_t	*sc = (shadowCache_t *)vertexCache.Position(tri->shadowCache);
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(shadowCache_t), sc->xyz.ToFloatPtr());
+		glVertexAttribPointer(ATTR_VERTEX, 3, GL_FLOAT, false, sizeof(shadowCache_t), sc->xyz.ToFloatPtr());
 	}
 
 	RB_DrawElementsWithCounters(tri);
@@ -1316,14 +1314,14 @@ static void RB_BlendLight(const drawSurf_t *drawSurfs,  const drawSurf_t *drawSu
 
 	// texture 1 will get the falloff texture
 	GL_SelectTexture(1);
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	glDisableVertexAttribArray(ATTR_TEXCOORD);
 	glEnable(GL_TEXTURE_GEN_S);
 	glTexCoord2f(0, 0.5);
 	backEnd.vLight->falloffImage->Bind();
 
 	// texture 0 will get the projected texture
 	GL_SelectTexture(0);
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	glDisableVertexAttribArray(ATTR_TEXCOORD);
 	glEnable(GL_TEXTURE_GEN_S);
 	glEnable(GL_TEXTURE_GEN_T);
 	glEnable(GL_TEXTURE_GEN_Q);
@@ -1474,7 +1472,7 @@ static void RB_FogPass(const drawSurf_t *drawSurfs,  const drawSurf_t *drawSurfs
 	GL_SelectTexture(0);
 	globalImages->fogImage->Bind();
 	//GL_Bind( tr.whiteImage );
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	glDisableVertexAttribArray(ATTR_TEXCOORD);
 	glEnable(GL_TEXTURE_GEN_S);
 	glEnable(GL_TEXTURE_GEN_T);
 	glTexCoord2f(0.5f, 0.5f);		// make sure Q is set
@@ -1493,7 +1491,7 @@ static void RB_FogPass(const drawSurf_t *drawSurfs,  const drawSurf_t *drawSurfs
 	// texture 1 is the entering plane fade correction
 	GL_SelectTexture(1);
 	globalImages->fogEnterImage->Bind();
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	glDisableVertexAttribArray(ATTR_TEXCOORD);
 	glEnable(GL_TEXTURE_GEN_S);
 	glEnable(GL_TEXTURE_GEN_T);
 

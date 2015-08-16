@@ -173,11 +173,11 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 	GL_UseProgram(&interactionShader);
 
 	// enable the vertex arrays
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
+	glEnableVertexAttribArray(ATTR_TEXCOORD);
+	glEnableVertexAttribArray(ATTR_TANGENT);
+	glEnableVertexAttribArray(ATTR_BITANGENT);
+	glEnableVertexAttribArray(ATTR_NORMAL);
+	glEnableVertexAttribArray(ATTR_COLOR);	// gl_Color
 
 	// set the modelview matrix for the viewer
 	float   mat[16];
@@ -200,24 +200,24 @@ void RB_GLSL_CreateDrawInteractions(const drawSurf_t *surf)
 		// set the vertex pointers
 		idDrawVert	*ac = (idDrawVert *)vertexCache.Position(surf->geo->ambientCache);
 
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Normal), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Bitangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Tangent), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
+		glVertexAttribPointer(ATTR_NORMAL, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->normal.ToFloatPtr());
+		glVertexAttribPointer(ATTR_BITANGENT, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[1].ToFloatPtr());
+		glVertexAttribPointer(ATTR_TANGENT, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->tangents[0].ToFloatPtr());
+		glVertexAttribPointer(ATTR_TEXCOORD, 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
 
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Color), 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), ac->color);
+		glVertexAttribPointer(ATTR_VERTEX, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
+		glVertexAttribPointer(ATTR_COLOR, 4, GL_UNSIGNED_BYTE, false, sizeof(idDrawVert), ac->color);
 
 		// this may cause RB_GLSL_DrawInteraction to be exacuted multiple
 		// times with different colors and images if the surface or light have multiple layers
 		RB_CreateSingleDrawInteractions(surf, RB_GLSL_DrawInteraction);
 	}
 
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Tangent));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Bitangent));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Normal));
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_Color));	// gl_Color
+	glDisableVertexAttribArray(ATTR_TEXCOORD);
+	glDisableVertexAttribArray(ATTR_TANGENT);
+	glDisableVertexAttribArray(ATTR_BITANGENT);
+	glDisableVertexAttribArray(ATTR_NORMAL);
+	glDisableVertexAttribArray(ATTR_COLOR);	// gl_Color
 
 	// disable features
 	GL_SelectTextureNoClient(5);
@@ -243,7 +243,7 @@ void RB_GLSL_DrawInteractions(void)
 
 	GL_SelectTexture(0);
 	/*
-	GL_DisableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	glDisableVertexAttribArray(ATTR_TEXCOORD);
 	*/
 
 	//
@@ -312,7 +312,7 @@ void RB_GLSL_DrawInteractions(void)
 
 	GL_SelectTexture(0);
 	/*
-	GL_EnableVertexAttribArray(offsetof(shaderProgram_t, attr_TexCoord));
+	glEnableVertexAttribArray(ATTR_TEXCOORD);
 	*/
 }
 
@@ -395,25 +395,25 @@ static bool R_LinkGLSLShader(shaderProgram_t *shaderProgram)
 
 	// all shaders use at least vertex'es as an attribute
 //    shaderProgram->addAttribute("attr_Vertex");
-	glBindAttribLocation(shaderProgram->program, 0, "attr_Vertex");
+	glBindAttribLocation(shaderProgram->program, ATTR_VERTEX, "attr_Vertex");
 
 	if (shaderProgram == &interactionShader) {
 		common->Printf("BINDING ATTRIBS for interaction shader\n");
-		glBindAttribLocation(shaderProgram->program, 1, "attr_TexCoord");
-		glBindAttribLocation(shaderProgram->program, 2, "attr_Color");
-		glBindAttribLocation(shaderProgram->program, 3, "attr_Normal");
-		glBindAttribLocation(shaderProgram->program, 4, "attr_Tangent");
-		glBindAttribLocation(shaderProgram->program, 5, "attr_Bitangent");
+		glBindAttribLocation(shaderProgram->program, ATTR_TEXCOORD, "attr_TexCoord");
+		glBindAttribLocation(shaderProgram->program, ATTR_COLOR, "attr_Color");
+		glBindAttribLocation(shaderProgram->program, ATTR_NORMAL, "attr_Normal");
+		glBindAttribLocation(shaderProgram->program, ATTR_TANGENT, "attr_Tangent");
+		glBindAttribLocation(shaderProgram->program, ATTR_BITANGENT, "attr_Bitangent");
 	} else if (shaderProgram == &shadowShader) {
 		common->Printf("BINDING ATTRIBS for shadow shader\n");
 		// No additional attributes needed atm
 	} else if (shaderProgram == &defaultShader) {
 		common->Printf("BINDING ATTRIBS for default shader\n");
-		glBindAttribLocation(shaderProgram->program, 1, "attr_TexCoord");
-		glBindAttribLocation(shaderProgram->program, 2, "attr_Color");
+		glBindAttribLocation(shaderProgram->program, ATTR_TEXCOORD, "attr_TexCoord");
+		glBindAttribLocation(shaderProgram->program, ATTR_COLOR, "attr_Color");
 	} else if (shaderProgram == &depthFillShader) {
 		common->Printf("BINDING ATTRIBS for depth fill shader\n");
-		glBindAttribLocation(shaderProgram->program, 1, "attr_TexCoord");
+		glBindAttribLocation(shaderProgram->program, ATTR_TEXCOORD, "attr_TexCoord");
 	} else {
 		common->Error("R_LinkGLSLShader: program unknown, no attribute settings available\n");
 		return false;
@@ -505,13 +505,6 @@ static void RB_GLSL_GetUniformLocations(shaderProgram_t *shader)
 
 	shader->modelMatrix = glGetUniformLocation(shader->program, "u_modelMatrix");
 	shader->textureMatrix = glGetUniformLocation(shader->program, "u_textureMatrix");
-
-	shader->attr_TexCoord = glGetAttribLocation(shader->program, "attr_TexCoord");
-	shader->attr_Tangent = glGetAttribLocation(shader->program, "attr_Tangent");
-	shader->attr_Bitangent = glGetAttribLocation(shader->program, "attr_Bitangent");
-	shader->attr_Normal = glGetAttribLocation(shader->program, "attr_Normal");
-	shader->attr_Vertex = glGetAttribLocation(shader->program, "attr_Vertex");
-	shader->attr_Color = glGetAttribLocation(shader->program, "attr_Color");
 	}
 
 	for (i = 0; i < MAX_VERTEX_PARMS; i++) {
@@ -577,7 +570,7 @@ static bool RB_GLSL_InitShaders(void)
 
 	// enable vertex attribute at location 0 once and for all.
 	// This is the vertices attribue and used acoss all shaders
-	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(ATTR_VERTEX);
 
 	return true;
 }

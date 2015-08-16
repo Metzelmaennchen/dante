@@ -131,8 +131,8 @@ void RB_RenderTriangleSurface(const srfTriangles_t *tri)
 	}
 
 	idDrawVert *ac = (idDrawVert *)vertexCache.Position(tri->ambientCache);
-	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_Vertex), 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
-	GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
+	glVertexAttribPointer(ATTR_VERTEX, 3, GL_FLOAT, false, sizeof(idDrawVert), ac->xyz.ToFloatPtr());
+	glVertexAttribPointer(ATTR_TEXCOORD, 2, GL_FLOAT, false, sizeof(idDrawVert), ac->st.ToFloatPtr());
 
 	RB_DrawElementsWithCounters(tri);
 }
@@ -414,7 +414,7 @@ void RB_FinishStageTexture(const textureStage_t *texture, const drawSurf_t *surf
 {
 	if (texture->texgen == TG_DIFFUSE_CUBE || texture->texgen == TG_SKYBOX_CUBE
 	    || texture->texgen == TG_WOBBLESKY_CUBE) {
-		GL_VertexAttribPointer(offsetof(shaderProgram_t, attr_TexCoord), 2, GL_FLOAT, false, sizeof(idDrawVert),
+		glVertexAttribPointer(ATTR_TEXCOORD, 2, GL_FLOAT, false, sizeof(idDrawVert),
 		                       (void *)&(((idDrawVert *)vertexCache.Position(surf->geo->ambientCache))->st));
 	}
 

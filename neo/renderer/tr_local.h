@@ -985,9 +985,6 @@ void	GL_UseProgram(shaderProgram_s *program);
 #define GL_Uniform1f(A, B) glUniform1f(*(GLint *)((char *)backEnd.glState.currentProgram + A), B)
 void	GL_Uniform4fv(GLint location, const GLfloat *value);
 void	GL_UniformMatrix4fv(GLint location, const GLfloat *value);
-void	GL_EnableVertexAttribArray(GLuint index);
-void	GL_DisableVertexAttribArray(GLuint index);
-void	GL_VertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
 void	GL_CheckErrors(void);
 void	GL_ClearStateDelta(void);
 void	GL_State(int stateVector);
@@ -1403,19 +1400,19 @@ typedef struct shaderProgram_s {
 	GLint		diffuseColor;
 	GLint		specularColor;
 
-	/* gl_... */
-	GLint		attr_TexCoord;
-	GLint		attr_Tangent;
-	GLint		attr_Bitangent;
-	GLint		attr_Normal;
-	GLint		attr_Vertex;
-	GLint		attr_Color;
-
 	GLint		nonPowerOfTwo;
 
 	GLint		u_fragmentMap[MAX_FRAGMENT_IMAGES];
 	GLint		u_vertexParm[MAX_VERTEX_PARMS];
 } shaderProgram_t;
+
+
+#define ATTR_VERTEX	0
+#define ATTR_TEXCOORD	1
+#define ATTR_COLOR	2
+#define ATTR_NORMAL	3
+#define ATTR_TANGENT	4
+#define ATTR_BITANGENT	5
 
 
 /* This file was automatically generated.  Do not edit! */
