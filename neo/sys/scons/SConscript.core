@@ -109,8 +109,7 @@ renderer_string = ' \
 	tr_shadowbounds.cpp \
 	tr_stencilshadow.cpp \
 	tr_subview.cpp \
-	tr_trisurf.cpp \
-	tr_turboshadow.cpp'
+	tr_trisurf.cpp'
 
 if ( local_opengl == 1 ):
 	renderer_string += ' \

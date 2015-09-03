@@ -1452,23 +1452,6 @@ srfTriangles_t *R_CreateShadowVolume(const idRenderEntityLocal *ent,
 /*
 ============================================================
 
-TR_TURBOSHADOW
-
-Fast, non-clipped overshoot shadow volumes
-
-"facing" should have one more element than tri->numIndexes / 3, which should be set to 1
-calling this function may modify "facing" based on culling
-
-============================================================
-*/
-
-srfTriangles_t *R_CreateTurboShadowVolume(const idRenderEntityLocal *ent,
-                const srfTriangles_t *tri, const idRenderLightLocal *light,
-                srfCullInfo_t &cullInfo);
-
-/*
-============================================================
-
 util/shadowopt3
 
 dmap time optimization of shadow volumes, called from R_CreateShadowVolume
