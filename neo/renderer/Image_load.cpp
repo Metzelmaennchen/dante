@@ -1237,7 +1237,7 @@ to be worth caching
 */
 bool idImage::ShouldImageBePartialCached()
 {
-	if (!glConfig.textureCompressionAvailable) {
+	if (!glConfig.textureCompressionETC1Available) {
 		return false;
 	}
 

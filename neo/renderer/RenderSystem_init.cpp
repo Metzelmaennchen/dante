@@ -30,6 +30,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma hdrstop
 
 #include "tr_local.h"
+#include "rg_etc1.h"
 
 // functions that are not called every frame
 
@@ -288,17 +289,13 @@ static void R_CheckPortableExtensions(void)
 	// GL_ARB_texture_non_power_of_two
 	glConfig.textureNonPowerOfTwoAvailable = R_CheckExtension("GL_ARB_texture_non_power_of_two");
 
-	// GL_ARB_texture_compression + GL_S3_s3tc
-	// DRI drivers may have GL_ARB_texture_compression but no GL_EXT_texture_compression_s3tc
-#if !defined(GL_ES_VERSION_2_0)
-	if (R_CheckExtension("GL_ARB_texture_compression") && R_CheckExtension("GL_EXT_texture_compression_s3tc")) {
-		glConfig.textureCompressionAvailable = true;
-		qglCompressedTexImage2DARB = (void (GL_APIENTRY *)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLint, GLsizei, const GLvoid *))GLimp_ExtensionPointer("glCompressedTexImage2DARB");
-		qglGetCompressedTexImageARB = (void (GL_APIENTRY *)(GLenum, GLint, GLvoid *))GLimp_ExtensionPointer("glGetCompressedTexImageARB");
-	} else
-#endif
-	{
-		glConfig.textureCompressionAvailable = false;
+	// GL_OES_compressed_ETC1_RGB8_texture
+	if (R_CheckExtension("GL_OES_compressed_ETC1_RGB8_texture")) {
+		glConfig.textureCompressionETC1Available = true;
+		// init etc1 packer
+		rg_etc1::pack_etc1_block_init();
+	} else {
+		glConfig.textureCompressionETC1Available = false;
 	}
 
 #if !defined(GL_ES_VERSION_2_0)
